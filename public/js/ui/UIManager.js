@@ -58,11 +58,11 @@ export class UIManager {
       });
 
       this.eventBus.on('ACHIEVEMENT_UNLOCKED', ({ title, description }) => {
-        this.showToast(title, description, 'UNLOCK');
+        this.showToast(title, description, 'UNLOCK', 3000);
       });
 
       this.eventBus.on('POWERUP_COLLECTED', ({ title }) => {
-        this.showToast('POWER-UP!', title, 'POWERUP');
+        this.showToast('POWER-UP', title, 'BUFF', 1400);
       });
     }
   }
@@ -100,7 +100,7 @@ export class UIManager {
       restartButton: this._getByTestId('restart-btn') || this._getByTestId('restart-button') || this.doc.getElementById('restart-button'),
       retryButton: this._getByTestId('game-over-restart-btn') || this._getByTestId('retry-button') || this.doc.getElementById('retry-button'),
       closeSettingsButton: this._getByTestId('settings-back-btn') || this._getByTestId('close-settings-button') || this.doc.getElementById('close-settings-button'),
-      closeSkinButton: this._getByTestId('skin-back-btn') || this.doc.getElementById('close-skin-button'),
+      closeSkinButton: this._getByTestId('skin-back-btn') || this._getByTestId('close-skin-button'),
       closeModeButton: this.doc.getElementById('close-mode-button'),
       closeTrophyButton: this.doc.getElementById('close-trophy-button')
     };
@@ -149,12 +149,11 @@ export class UIManager {
     });
 
     addClick(this.elements.restartButton, () => {
+      if (this.gameEngine) this.gameEngine.restartGame();
       if (this.stateMachine) this.stateMachine.setState(GameState.START);
-      if (this.gameEngine) this.gameEngine.setState(GameState.START);
     });
 
     addClick(this.elements.retryButton, () => {
-      if (this.stateMachine) this.stateMachine.setState(GameState.START);
       if (this.gameEngine) this.gameEngine.setState(GameState.START);
     });
 
@@ -205,10 +204,15 @@ export class UIManager {
     });
   }
 
-  showToast(title, description, badgeText = 'AWARD') {
+  showToast(title, description, badgeText = 'AWARD', durationMs = 1800) {
     if (!this.doc) return;
     const container = this.doc.getElementById('toast-container');
     if (!container) return;
+
+    // Clear existing toasts to prevent multi-notification screen clutter
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
 
     const toast = this.doc.createElement('div');
     toast.className = 'toast-item';
@@ -225,7 +229,7 @@ export class UIManager {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
       }
-    }, 3500);
+    }, durationMs);
   }
 
   syncTrophyUI() {
