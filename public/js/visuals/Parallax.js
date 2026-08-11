@@ -174,25 +174,25 @@ export class Parallax {
 
   getCelestialPosition() {
     const cx = this.width / 2;
-    const rx = (this.width / 2) + 40; // Full arc extending beyond left and right screen boundaries
-    const horizonY = this.playHeight * 0.72;
+    const rx = (this.width / 2) - 30; // Radius along X axis (starts at x=30 horizon, peaks at x=180 zenith, ends at x=330)
+    const horizonY = this.playHeight * 0.75;
     const arcHeight = 220;
 
     let celestialType = 'sun';
-    let p = 0; // Normalized orbital angle index (0.0 = east horizon -> 1.0 = west horizon)
+    let p = 0; // Normalized orbital angle index (0.0 = east horizon -> 0.5 = zenith -> 1.0 = west horizon)
 
     if (this.currentPhase === WeatherPhase.DAY) {
       celestialType = 'sun';
-      p = this.phaseProgress * 0.75; // Rises from East (-40px) to upper West
+      p = this.phaseProgress; // 0.0 (East) -> 0.5 (Zenith 180px) -> 1.0 (West)
     } else if (this.currentPhase === WeatherPhase.SUNSET) {
       celestialType = 'sun';
-      p = 0.75 + (this.phaseProgress * 0.35); // Sinks into West horizon below ground
+      p = 1.0 + (this.phaseProgress * 0.35); // Sinks below West horizon ground
     } else if (this.currentPhase === WeatherPhase.NIGHT) {
       celestialType = 'moon';
-      p = this.phaseProgress * 0.75; // Moon rises from East (-40px) under night sky
+      p = this.phaseProgress; // 0.0 (East) -> 0.5 (Zenith 180px) -> 1.0 (West)
     } else if (this.currentPhase === WeatherPhase.DAWN) {
       celestialType = 'moon';
-      p = 0.75 + (this.phaseProgress * 0.35); // Moon sets into West horizon as sunrise begins
+      p = 1.0 + (this.phaseProgress * 0.35); // Sinks below West horizon ground as dawn breaks
     }
 
     const angle = p * Math.PI;

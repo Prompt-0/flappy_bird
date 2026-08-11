@@ -135,11 +135,29 @@ export class InputManager {
 
     const code = event.code;
     const key = event.key;
+    const currentState = this.stateMachine ? this.stateMachine.getState() : (this.gameEngine ? this.gameEngine.state : GameState.START);
+
+    // Keyboard navigation across options/menus when not actively flying in PLAYING state
+    if (currentState !== GameState.PLAYING) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key) || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code)) {
+        event.preventDefault();
+        if (this.eventBus) {
+          this.eventBus.emit('KEYBOARD_NAV', { key: key || code });
+        }
+        return;
+      }
+    }
 
     if (code === 'Space' || key === ' ') {
+      if (currentState !== GameState.PLAYING && typeof document !== 'undefined' && document.activeElement && document.activeElement.tagName === 'BUTTON') {
+        return; // Allow native button click
+      }
       event.preventDefault();
       this.dispatchAction(InputAction.FLAP);
     } else if (code === 'Enter' || key === 'Enter') {
+      if (currentState !== GameState.PLAYING && typeof document !== 'undefined' && document.activeElement && document.activeElement.tagName === 'BUTTON') {
+        return; // Allow native button click
+      }
       event.preventDefault();
       this.dispatchAction(InputAction.ENTER);
     } else if (code === 'KeyP' || key === 'p' || key === 'P') {

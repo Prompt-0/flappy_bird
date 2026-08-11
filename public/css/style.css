@@ -9,6 +9,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Keyboard Focus Ring Styles for Options & Menu Buttons */
+button:focus,
+button:focus-visible,
+.btn:focus,
+.btn:focus-visible,
+.skin-option:focus,
+.skin-option:focus-visible,
+.mode-card:focus,
+.mode-card:focus-visible {
+  outline: 3px solid #38bdf8 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.8) !important;
+  transform: scale(1.03);
+}
+
 html, body {
   width: 100%;
   height: 100vh;

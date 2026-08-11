@@ -61,8 +61,8 @@ export class UIManager {
         this.showToast(title, description, 'UNLOCK', 3000);
       });
 
-      this.eventBus.on('POWERUP_COLLECTED', ({ title }) => {
-        this.showToast('POWER-UP', title, 'BUFF', 1400);
+      this.eventBus.on('KEYBOARD_NAV', ({ key }) => {
+        this.handleKeyboardNavigation(key);
       });
     }
   }
@@ -202,6 +202,41 @@ export class UIManager {
         this.selectSkin(skinId);
       });
     });
+  }
+
+  handleKeyboardNavigation(key) {
+    if (!this.doc) return;
+
+    // Locate active visible overlay screen
+    const activeScreen = this.doc.querySelector('.overlay-screen.active:not(.hidden), .overlay-screen:not(.hidden)');
+    if (!activeScreen) return;
+
+    // Get all focusable buttons/inputs inside the active overlay
+    const focusables = Array.from(activeScreen.querySelectorAll('button:not([disabled]), input:not([disabled])'));
+    if (focusables.length === 0) return;
+
+    const activeEl = this.doc.activeElement;
+    let currentIndex = focusables.indexOf(activeEl);
+
+    if (key === 'ArrowDown' || key === 'ArrowRight' || key === 'Tab') {
+      if (currentIndex === -1) {
+        currentIndex = 0;
+      } else {
+        currentIndex = (currentIndex + 1) % focusables.length;
+      }
+      focusables[currentIndex].focus();
+    } else if (key === 'ArrowUp' || key === 'ArrowLeft') {
+      if (currentIndex === -1) {
+        currentIndex = focusables.length - 1;
+      } else {
+        currentIndex = (currentIndex - 1 + focusables.length) % focusables.length;
+      }
+      focusables[currentIndex].focus();
+    } else if (key === 'Enter' || key === ' ') {
+      if (currentIndex !== -1 && focusables[currentIndex]) {
+        focusables[currentIndex].click();
+      }
+    }
   }
 
   showToast(title, description, badgeText = 'AWARD', durationMs = 1800) {
