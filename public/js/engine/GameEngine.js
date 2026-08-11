@@ -260,6 +260,21 @@ export class GameEngine {
     this.powerUpManager.render(this.ctx);
     this.particleEngine.render(this.ctx);
 
+    // Render soft ground drop shadow under bird
+    if (this.bird.y < this.playHeight - 14) {
+      this.ctx.save();
+      const shadowY = this.playHeight - 2;
+      const heightRatio = Math.max(0, 1 - (this.playHeight - this.bird.y) / 450);
+      const shadowWidth = (this.bird.radius * 1.4) * (0.5 + 0.5 * heightRatio);
+      const shadowAlpha = 0.25 * heightRatio;
+
+      this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha.toFixed(2)})`;
+      this.ctx.beginPath();
+      this.ctx.ellipse(this.bird.x, shadowY, shadowWidth, shadowWidth * 0.35, 0, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+
     // Render bird (flash during invulnerability)
     if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
       this.ctx.globalAlpha = 0.4;

@@ -209,21 +209,51 @@ export class Parallax {
     }
     ctx.fillRect(0, 0, this.width, this.playHeight);
 
-    // 2. Celestial Body (Sun / Moon)
+    // 2. Celestial Body (Sun / Moon) & Volumetric Rays
     const celestial = this.getCelestialPosition();
     ctx.save();
     if (celestial.type === 'sun') {
-      ctx.fillStyle = '#ffea64';
+      // 1. Volumetric God-Rays
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = '#fffbeb';
+      const rayCount = 6;
+      for (let i = 0; i < rayCount; i++) {
+        const rayAngle = (i * Math.PI / 3) + (this.phaseTimer * 0.05);
+        ctx.beginPath();
+        ctx.moveTo(celestial.x, celestial.y);
+        ctx.lineTo(celestial.x + Math.cos(rayAngle - 0.15) * 350, celestial.y + Math.sin(rayAngle - 0.15) * 350);
+        ctx.lineTo(celestial.x + Math.cos(rayAngle + 0.15) * 350, celestial.y + Math.sin(rayAngle + 0.15) * 350);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // 2. Outer Sun Corona Halo
+      ctx.fillStyle = 'rgba(255, 234, 100, 0.18)';
       ctx.beginPath();
-      ctx.arc(celestial.x, celestial.y, 22, 0, Math.PI * 2);
+      ctx.arc(celestial.x, celestial.y, 42, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outer sun glow
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.25)';
+      // 3. Middle Glow
+      ctx.fillStyle = 'rgba(255, 234, 100, 0.35)';
       ctx.beginPath();
-      ctx.arc(celestial.x, celestial.y, 32, 0, Math.PI * 2);
+      ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Core Sun Disk
+      ctx.fillStyle = '#fff7ed';
+      ctx.beginPath();
+      ctx.arc(celestial.x, celestial.y, 20, 0, Math.PI * 2);
       ctx.fill();
     } else {
+      // Moon Outer Halo
+      ctx.fillStyle = 'rgba(240, 243, 244, 0.2)';
+      ctx.beginPath();
+      ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Moon Body
       ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 18, 0, Math.PI * 2);

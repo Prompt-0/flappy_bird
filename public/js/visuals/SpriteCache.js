@@ -61,7 +61,7 @@ export class SpriteCache {
   }
 
   /**
-   * Pre-renders and caches pipe sprite asset.
+   * Pre-renders and caches pipe sprite asset with glossy 3D cylindrical lighting.
    */
   getPipeSprite(width = 64, height = 400, color = '#73bf2e') {
     const key = `pipe_${width}_${height}_${color}`;
@@ -72,25 +72,64 @@ export class SpriteCache {
     const canvas = this.createCanvas(width, height);
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Base pipe column fill
-      ctx.fillStyle = color;
+      // 1. 3D Cylindrical Main Body Gradient
+      const bodyGrad = (ctx.createLinearGradient)
+        ? ctx.createLinearGradient(0, 0, width, 0)
+        : null;
+
+      if (bodyGrad && bodyGrad.addColorStop) {
+        bodyGrad.addColorStop(0, '#3e6b18');
+        bodyGrad.addColorStop(0.18, '#8de635');
+        bodyGrad.addColorStop(0.40, color);
+        bodyGrad.addColorStop(0.80, '#4e821e');
+        bodyGrad.addColorStop(1.0, '#2d4d11');
+        ctx.fillStyle = bodyGrad;
+      } else {
+        ctx.fillStyle = color;
+      }
       ctx.fillRect(0, 0, width, height);
 
-      // Highlight stripe on left edge
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.fillRect(0, 0, Math.floor(width * 0.2), height);
+      // Specular highlight stripe
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fillRect(Math.floor(width * 0.12), 0, Math.max(2, Math.floor(width * 0.08)), height);
 
-      // Dark shadow stripe on right edge
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.fillRect(Math.floor(width * 0.8), 0, Math.ceil(width * 0.2), height);
-
-      // Pipe cap top collar
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, width, 24);
+      // Outer crisp bevel stroke
       if (ctx.strokeRect) {
-        ctx.strokeStyle = '#558022';
+        ctx.strokeStyle = '#233d0e';
         ctx.lineWidth = 2;
         ctx.strokeRect(1, 1, width - 2, height - 2);
+      }
+
+      // 2. Top Collar Cap with 3D Bevel & Drop Shadow
+      const collarHeight = 24;
+      const collarGrad = (ctx.createLinearGradient)
+        ? ctx.createLinearGradient(0, 0, width, 0)
+        : null;
+
+      if (collarGrad && collarGrad.addColorStop) {
+        collarGrad.addColorStop(0, '#4c821e');
+        collarGrad.addColorStop(0.20, '#a2f547');
+        collarGrad.addColorStop(0.45, color);
+        collarGrad.addColorStop(0.85, '#4e821e');
+        collarGrad.addColorStop(1.0, '#233d0e');
+        ctx.fillStyle = collarGrad;
+      } else {
+        ctx.fillStyle = color;
+      }
+      ctx.fillRect(0, 0, width, collarHeight);
+
+      // Collar highlight & rim shadow
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillRect(Math.floor(width * 0.12), 0, Math.max(2, Math.floor(width * 0.08)), collarHeight);
+
+      // Drop shadow underneath collar
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.fillRect(0, collarHeight, width, 5);
+
+      if (ctx.strokeRect) {
+        ctx.strokeStyle = '#1b300b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, width - 2, collarHeight - 2);
       }
     }
 
