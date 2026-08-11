@@ -1,0 +1,331 @@
+/* Reset & Global Viewport Lockdown */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #0f172a;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+}
+
+/* 9:16 Responsive Game Container */
+.game-container {
+  position: relative;
+  width: 360px;
+  height: 640px;
+  background-color: #70c5ce;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  touch-action: none;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: none;
+}
+
+/* Live HUD Score Overlay */
+.hud-score {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 3px 3px 0 #000000, -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 0 4px 10px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  pointer-events: none;
+  letter-spacing: 2px;
+}
+
+/* Overlay Screen Backdrop & Flex Layout */
+.overlay-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.overlay-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Modal Cards */
+.modal-card {
+  width: 85%;
+  max-width: 310px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #38bdf8;
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  color: #f8fafc;
+}
+
+.game-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #facc15;
+  text-shadow: 2px 2px 0 #b45309, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.modal-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 16px;
+}
+
+.game-over-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #ef4444;
+  text-shadow: 2px 2px 0 #7f1d1d;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+/* Score Board */
+.score-board {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+  font-size: 1.1rem;
+}
+
+.score-label {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.score-val {
+  color: #facc15;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+/* Button Group & Buttons */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #15803d;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+}
+
+.btn-secondary {
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #075985;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(180deg, #38bdf8 0%, #0369a1 100%);
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #991b1b;
+}
+
+.btn-toggle {
+  width: auto;
+  min-width: 80px;
+  padding: 8px 16px;
+  background: #475569;
+  color: #e2e8f0;
+  box-shadow: 0 3px 0 #334155;
+}
+
+.btn-toggle.active {
+  background: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 3px 0 #15803d;
+}
+
+/* Skin List & Options */
+.skin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.skin-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.skin-option:hover:not(.locked) {
+  border-color: #38bdf8;
+  background: #334155;
+}
+
+.skin-option.selected {
+  border-color: #facc15;
+  background: rgba(250, 204, 21, 0.15);
+  color: #facc15;
+}
+
+.skin-option.locked {
+  opacity: 0.6;
+  border-color: #334155;
+  background: #0f172a;
+  cursor: not-allowed;
+}
+
+.skin-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.skin-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.skin-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.skin-option.selected .skin-status {
+  background: #facc15;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.skin-option.unlocked:not(.selected) .skin-status {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+.skin-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.skin-color.classic { background-color: #facc15; }
+.skin-color.crimson { background-color: #ef4444; }
+.skin-color.cyber { background-color: #06b6d4; }
+.skin-color.golden { background-color: #eab308; }
+.skin-color.raven { background-color: #64748b; }
+
+/* Setting Row */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.setting-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}

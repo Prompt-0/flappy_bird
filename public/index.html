@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Flappy Bird Web Game</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <div id="game-container" class="game-container">
+    <canvas id="game-canvas" data-testid="game-canvas" width="360" height="640"></canvas>
+
+    <!-- In-Game HUD Score Display -->
+    <div id="hud-score" data-testid="score-display" class="hud-score">0</div>
+
+    <!-- 1. Start Screen Modal -->
+    <div id="start-screen" data-testid="start-screen" class="overlay-screen active">
+      <div class="modal-card bounce-in">
+        <h1 class="game-title floating">FLAPPY BIRD</h1>
+        <p class="subtitle">Press Space or Tap to Flap</p>
+        <div class="button-group">
+          <button id="start-button" data-testid="start-button" class="btn btn-primary">Play</button>
+          <button id="skin-select-button" data-testid="skin-select-button" class="btn btn-secondary">Skins</button>
+          <button id="settings-button" data-testid="settings-button" class="btn btn-secondary">Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Pause Screen Modal -->
+    <div id="pause-screen" data-testid="pause-screen" class="overlay-screen hidden">
+      <div class="modal-card pop-in">
+        <h2 class="modal-title">PAUSED</h2>
+        <div class="button-group">
+          <button id="resume-button" data-testid="resume-button" class="btn btn-primary">Resume</button>
+          <button id="restart-button" data-testid="restart-button" class="btn btn-danger">Restart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Game Over Screen Modal -->
+    <div id="game-over-screen" data-testid="game-over-screen" class="overlay-screen hidden">
+      <div class="modal-card shake">
+        <h2 class="game-over-title">GAME OVER</h2>
+        <div class="score-board">
+          <div class="score-item">
+            <span class="score-label">Score</span>
+            <span id="final-score" data-testid="final-score" class="score-val">0</span>
+          </div>
+          <div class="score-item">
+            <span class="score-label">Best</span>
+            <span id="best-score" data-testid="high-score-display" class="score-val">0</span>
+          </div>
+        </div>
+        <div class="button-group">
+          <button id="retry-button" data-testid="retry-button" class="btn btn-primary">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Skin Select Screen Modal -->
+    <div id="skin-select-screen" data-testid="skin-select-screen" class="overlay-screen hidden">
+      <div class="modal-card pop-in">
+        <h2 class="modal-title">Select Bird Skin</h2>
+        <div id="skin-list" class="skin-list">
+          <button data-testid="skin-option" data-skin-id="classic_yellow" class="skin-option selected">
+            <span class="skin-color classic"></span>
+            <div class="skin-info">
+              <span class="skin-name">Classic Yellow</span>
+              <span class="skin-status">Equipped</span>
+            </div>
+          </button>
+          <button data-testid="skin-option" data-skin-id="crimson_phoenix" class="skin-option locked">
+            <span class="skin-color crimson"></span>
+            <div class="skin-info">
+              <span class="skin-name">Crimson Phoenix</span>
+              <span class="skin-status">🔒 Score ≥ 20</span>
+            </div>
+          </button>
+          <button data-testid="skin-option" data-skin-id="neon_cyber" class="skin-option locked">
+            <span class="skin-color cyber"></span>
+            <div class="skin-info">
+              <span class="skin-name">Neon Cyber</span>
+              <span class="skin-status">🔒 Score ≥ 50</span>
+            </div>
+          </button>
+          <button data-testid="skin-option" data-skin-id="golden_eagle" class="skin-option locked">
+            <span class="skin-color golden"></span>
+            <div class="skin-info">
+              <span class="skin-name">Golden Eagle</span>
+              <span class="skin-status">🔒 Score ≥ 100</span>
+            </div>
+          </button>
+          <button data-testid="skin-option" data-skin-id="midnight_raven" class="skin-option locked">
+            <span class="skin-color raven"></span>
+            <div class="skin-info">
+              <span class="skin-name">Midnight Raven</span>
+              <span class="skin-status">🔒 50 Games</span>
+            </div>
+          </button>
+        </div>
+        <div class="button-group">
+          <button id="close-skin-button" data-testid="close-skin-button" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Settings Screen Modal -->
+    <div id="settings-screen" data-testid="settings-screen" class="overlay-screen hidden">
+      <div class="modal-card pop-in">
+        <h2 class="modal-title">Settings</h2>
+        <div class="setting-row">
+          <span class="setting-label">Sound FX</span>
+          <button id="sound-toggle" data-testid="sound-toggle" class="btn btn-toggle active">ON</button>
+        </div>
+        <div class="button-group">
+          <button id="close-settings-button" data-testid="close-settings-button" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

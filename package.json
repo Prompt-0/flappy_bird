@@ -1,0 +1,19 @@
+{
+  "name": "flappy_bird",
+  "version": "1.0.0",
+  "description": "Flappy Bird Web Game Engine & Physics",
+  "main": "public/js/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/unit/test_engine.js",
+    "test:unit": "node tests/unit/test_engine.js",
+    "test:visuals": "node tests/unit/test_visuals.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  }
+}
