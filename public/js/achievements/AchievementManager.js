@@ -73,6 +73,10 @@ export class AchievementManager {
     }
   }
 
+  isUnlocked(id) {
+    return this.unlockedIds.has(id);
+  }
+
   getAchievements() {
     return ACHIEVEMENTS.map(ach => ({
       ...ach,
