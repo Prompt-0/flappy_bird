@@ -173,23 +173,37 @@ export class Parallax {
   }
 
   getCelestialPosition() {
-    // Parabolic / circular arc calculation for Sun (day) and Moon (night)
-    const p = this.phaseProgress;
-    const angle = p * Math.PI; // 0 to PI radians across horizon
     const cx = this.width / 2;
-    const rx = (this.width / 2) - 30; // Radius along X axis
-    const horizonY = this.playHeight * 0.75;
-    const arcHeight = 220; // Radius along Y axis
+    const rx = (this.width / 2) + 40; // Full arc extending beyond left and right screen boundaries
+    const horizonY = this.playHeight * 0.72;
+    const arcHeight = 220;
 
+    let celestialType = 'sun';
+    let p = 0; // Normalized orbital angle index (0.0 = east horizon -> 1.0 = west horizon)
+
+    if (this.currentPhase === WeatherPhase.DAY) {
+      celestialType = 'sun';
+      p = this.phaseProgress * 0.75; // Rises from East (-40px) to upper West
+    } else if (this.currentPhase === WeatherPhase.SUNSET) {
+      celestialType = 'sun';
+      p = 0.75 + (this.phaseProgress * 0.35); // Sinks into West horizon below ground
+    } else if (this.currentPhase === WeatherPhase.NIGHT) {
+      celestialType = 'moon';
+      p = this.phaseProgress * 0.75; // Moon rises from East (-40px) under night sky
+    } else if (this.currentPhase === WeatherPhase.DAWN) {
+      celestialType = 'moon';
+      p = 0.75 + (this.phaseProgress * 0.35); // Moon sets into West horizon as sunrise begins
+    }
+
+    const angle = p * Math.PI;
     const x = cx - rx * Math.cos(angle);
     const y = horizonY - arcHeight * Math.sin(angle);
 
-    const isSun = (this.currentPhase === WeatherPhase.DAY || this.currentPhase === WeatherPhase.SUNSET);
     return {
       x,
       y,
       angle,
-      type: isSun ? 'sun' : 'moon'
+      type: celestialType
     };
   }
 
