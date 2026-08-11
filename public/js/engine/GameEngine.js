@@ -8,6 +8,9 @@ import { SpriteCache } from '../visuals/SpriteCache.js';
 import { StorageEngine } from '../storage/StorageEngine.js';
 import { SkinManager } from '../storage/SkinManager.js';
 import { AudioManager } from '../audio/AudioManager.js';
+import { PowerUpManager } from './PowerUpManager.js';
+import { GameModeManager } from '../modes/GameModeManager.js';
+import { AchievementManager } from '../achievements/AchievementManager.js';
 
 export const EngineState = {
   START: 'START',
@@ -28,6 +31,10 @@ export class GameEngine {
     this.parallax = new Parallax(360, 640, { playHeight: 528 });
     this.particleEngine = new ParticleEngine(200);
     this.spriteCache = new SpriteCache();
+
+    this.powerUpManager = new PowerUpManager(this.eventBus);
+    this.gameModeManager = new GameModeManager(this.eventBus);
+    this.achievementManager = new AchievementManager(this.eventBus, this.storageEngine);
 
     this.state = EngineState.START;
     this.score = 0;
@@ -62,7 +69,10 @@ export class GameEngine {
     // Subscribe to gameplay events for particle FX and score tracking
     this.eventBus.on('PIPE_PASS', (data) => {
       if (this.state === EngineState.PLAYING) {
-        this.score = (data && typeof data.score === 'number') ? data.score : this.score + 1;
+        const mult = (this.powerUpManager && this.powerUpManager.activeEffects.scoreMultiplier) || 1;
+        const addScore = (data && typeof data.score === 'number') ? (data.score - this.score) : 1;
+        this.score += Math.max(1, addScore) * mult;
+
         if (this.score > this.highScore) {
           this.highScore = this.score;
         }
@@ -122,6 +132,7 @@ export class GameEngine {
       this.initialHighScore = this.highScore;
       this.bird.reset(100, 250);
       this.pipeManager.reset();
+      this.powerUpManager.reset();
       this.particleEngine.reset();
       this.hoverTimer = 0;
     } else if (newState === EngineState.PLAYING && oldState === EngineState.START) {
@@ -166,16 +177,26 @@ export class GameEngine {
     } else if (this.state === EngineState.PLAYING) {
       this.bird.update(dt);
       this.pipeManager.update(dt, this.bird.x);
+      this.powerUpManager.update(dt, this.pipeManager.scrollSpeed, this.bird);
       this.parallax.update(dt, 160);
       this.particleEngine.update(dt);
 
       const hit = CollisionSystem.checkAll(this.bird, this.pipeManager.getPipes(), this.playHeight);
       if (hit.collided) {
-        this.bird.isDead = true;
-        this.eventBus.emit('BIRD_HIT', { x: this.bird.x, y: this.bird.y, cause: hit.cause });
-        const isHighScore = this.score > this.initialHighScore;
-        this.setState(EngineState.GAME_OVER);
-        this.eventBus.emit('GAME_OVER', { score: this.score, finalScore: this.score, isHighScore });
+        if (this.gameModeManager && this.gameModeManager.currentMode === 'ZEN') {
+          // Zen mode: soft bounce without game over
+          this.bird.vy = -220;
+        } else if (this.powerUpManager && this.powerUpManager.consumeShield()) {
+          // Shield absorbed collision!
+          this.bird.vy = -280;
+          this.particleEngine.emitCollisionBurst(this.bird.x, this.bird.y);
+        } else {
+          this.bird.isDead = true;
+          this.eventBus.emit('BIRD_HIT', { x: this.bird.x, y: this.bird.y, cause: hit.cause });
+          const isHighScore = this.score > this.initialHighScore;
+          this.setState(EngineState.GAME_OVER);
+          this.eventBus.emit('GAME_OVER', { score: this.score, finalScore: this.score, isHighScore });
+        }
       }
     } else if (this.state === EngineState.GAME_OVER) {
       this.particleEngine.update(dt);
@@ -204,10 +225,24 @@ export class GameEngine {
     // 1. Multi-layer Parallax & Weather Background
     this.parallax.render(this.ctx);
 
-    // 2. Pipes & Bird Entities
+    // 2. Pipes, Power-ups & Entities
     this.pipeManager.render(this.ctx);
+    this.powerUpManager.render(this.ctx);
     this.particleEngine.render(this.ctx);
     this.bird.render(this.ctx);
+
+    // 3. Render Shield Bubble Aura around Bird
+    if (this.powerUpManager && this.powerUpManager.activeEffects.hasShield && !this.bird.isDead) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(this.bird.x, this.bird.y, this.bird.radius + 6, 0, Math.PI * 2);
+      this.ctx.strokeStyle = '#38bdf8';
+      this.ctx.lineWidth = 3;
+      this.ctx.shadowColor = '#38bdf8';
+      this.ctx.shadowBlur = 12;
+      this.ctx.stroke();
+      this.ctx.restore();
+    }
   }
 
   start() {

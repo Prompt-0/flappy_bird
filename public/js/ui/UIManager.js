@@ -36,6 +36,8 @@ export class UIManager {
       this.stateMachine.onEnter(GameState.GAME_OVER, () => this.updateVisibility(GameState.GAME_OVER));
       this.stateMachine.onEnter(GameState.SKIN_SELECT, () => this.updateVisibility(GameState.SKIN_SELECT));
       this.stateMachine.onEnter(GameState.SETTINGS, () => this.updateVisibility(GameState.SETTINGS));
+      this.stateMachine.onEnter(GameState.MODE_SELECT, () => this.updateVisibility(GameState.MODE_SELECT));
+      this.stateMachine.onEnter(GameState.TROPHY_CABINET, () => this.updateVisibility(GameState.TROPHY_CABINET));
     }
 
     if (this.eventBus) {
@@ -54,6 +56,14 @@ export class UIManager {
       this.eventBus.on('ENGINE_STATE_CHANGE', ({ newState }) => {
         this.updateVisibility(newState);
       });
+
+      this.eventBus.on('ACHIEVEMENT_UNLOCKED', ({ title, description, icon }) => {
+        this.showToast(title, description, icon);
+      });
+
+      this.eventBus.on('POWERUP_COLLECTED', ({ title }) => {
+        this.showToast('POWER-UP!', title, '⚡');
+      });
     }
   }
 
@@ -69,7 +79,9 @@ export class UIManager {
       [GameState.PAUSED]: this._getByTestId('pause-screen') || this.doc.getElementById('pause-screen'),
       [GameState.GAME_OVER]: this._getByTestId('game-over-screen') || this.doc.getElementById('game-over-screen'),
       [GameState.SKIN_SELECT]: this._getByTestId('skin-select-screen') || this.doc.getElementById('skin-select-screen'),
-      [GameState.SETTINGS]: this._getByTestId('settings-screen') || this.doc.getElementById('settings-screen')
+      [GameState.SETTINGS]: this._getByTestId('settings-screen') || this.doc.getElementById('settings-screen'),
+      [GameState.MODE_SELECT]: this._getByTestId('mode-screen') || this.doc.getElementById('mode-screen'),
+      [GameState.TROPHY_CABINET]: this._getByTestId('trophy-screen') || this.doc.getElementById('trophy-screen')
     };
 
     // Cache dynamic UI elements
@@ -80,12 +92,16 @@ export class UIManager {
       soundToggle: this._getByTestId('mute-btn') || this._getByTestId('sound-toggle') || this.doc.getElementById('sound-toggle'),
       startButton: this._getByTestId('start-btn') || this._getByTestId('start-button') || this.doc.getElementById('start-button'),
       skinSelectButton: this._getByTestId('skin-select-btn') || this._getByTestId('skin-select-button') || this.doc.getElementById('skin-select-button'),
+      modeButton: this._getByTestId('mode-button') || this.doc.getElementById('mode-button'),
+      trophyButton: this._getByTestId('trophy-button') || this.doc.getElementById('trophy-button'),
       settingsButton: this._getByTestId('settings-btn') || this._getByTestId('settings-button') || this.doc.getElementById('settings-button'),
       resumeButton: this._getByTestId('resume-btn') || this._getByTestId('resume-button') || this.doc.getElementById('resume-button'),
       restartButton: this._getByTestId('restart-btn') || this._getByTestId('restart-button') || this.doc.getElementById('restart-button'),
       retryButton: this._getByTestId('game-over-restart-btn') || this._getByTestId('retry-button') || this.doc.getElementById('retry-button'),
       closeSettingsButton: this._getByTestId('settings-back-btn') || this._getByTestId('close-settings-button') || this.doc.getElementById('close-settings-button'),
-      closeSkinButton: this._getByTestId('skin-back-btn') || this.doc.getElementById('close-skin-button')
+      closeSkinButton: this._getByTestId('skin-back-btn') || this.doc.getElementById('close-skin-button'),
+      closeModeButton: this.doc.getElementById('close-mode-button'),
+      closeTrophyButton: this.doc.getElementById('close-trophy-button')
     };
 
     // Attach button click handlers
@@ -106,6 +122,14 @@ export class UIManager {
 
     addClick(this.elements.skinSelectButton, () => {
       if (this.stateMachine) this.stateMachine.setState(GameState.SKIN_SELECT);
+    });
+
+    addClick(this.elements.modeButton, () => {
+      if (this.stateMachine) this.stateMachine.setState(GameState.MODE_SELECT);
+    });
+
+    addClick(this.elements.trophyButton, () => {
+      if (this.stateMachine) this.stateMachine.setState(GameState.TROPHY_CABINET);
     });
 
     addClick(this.elements.settingsButton, () => {
@@ -134,9 +158,34 @@ export class UIManager {
       if (this.stateMachine) this.stateMachine.setState(GameState.START);
     });
 
+    addClick(this.elements.closeModeButton, () => {
+      if (this.stateMachine) this.stateMachine.setState(GameState.START);
+    });
+
+    addClick(this.elements.closeTrophyButton, () => {
+      if (this.stateMachine) this.stateMachine.setState(GameState.START);
+    });
+
     addClick(this.elements.soundToggle, () => {
       this.toggleSound();
     });
+
+    // Attach Mode selection handlers
+    const classicBtn = this.doc.getElementById('mode-classic-btn');
+    const challengeBtn = this.doc.getElementById('mode-challenge-btn');
+    const zenBtn = this.doc.getElementById('mode-zen-btn');
+
+    const selectModeUI = (mode, btn) => {
+      if (this.gameEngine && this.gameEngine.gameModeManager) {
+        this.gameEngine.gameModeManager.setMode(mode);
+      }
+      [classicBtn, challengeBtn, zenBtn].forEach(b => b && b.classList.remove('selected'));
+      if (btn) btn.classList.add('selected');
+    };
+
+    addClick(classicBtn, () => selectModeUI('CLASSIC', classicBtn));
+    addClick(challengeBtn, () => selectModeUI('CHALLENGE', challengeBtn));
+    addClick(zenBtn, () => selectModeUI('ZEN', zenBtn));
 
     // Attach skin option click handlers
     const skinOptions = this.doc.querySelectorAll('[data-testid^="skin-option"], .skin-option');
@@ -145,6 +194,52 @@ export class UIManager {
         const skinId = opt.getAttribute('data-skin-id') || (opt.getAttribute('data-testid') ? opt.getAttribute('data-testid').replace('skin-option-', '') : null);
         this.selectSkin(skinId);
       });
+    });
+  }
+
+  showToast(title, description, icon = '🏆') {
+    if (!this.doc) return;
+    const container = this.doc.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = this.doc.createElement('div');
+    toast.className = 'toast-item';
+    toast.innerHTML = `
+      <span class="toast-icon">${icon}</span>
+      <div class="toast-body">
+        <span class="toast-title">${title}</span>
+        <span class="toast-desc">${description}</span>
+      </div>
+    `;
+
+    container.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 3500);
+  }
+
+  syncTrophyUI() {
+    if (!this.doc) return;
+    const container = this.doc.getElementById('trophy-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const achManager = this.gameEngine ? this.gameEngine.achievementManager : null;
+    const achievements = achManager ? achManager.getAchievements() : [];
+
+    achievements.forEach(ach => {
+      const card = this.doc.createElement('div');
+      card.className = `trophy-card ${ach.unlocked ? 'unlocked' : 'locked'}`;
+      card.innerHTML = `
+        <span class="trophy-status ${ach.unlocked ? 'unlocked' : 'locked'}">${ach.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
+        <div class="trophy-info">
+          <span class="trophy-title">${ach.title}</span>
+          <span class="trophy-desc">${ach.unlocked ? ach.description : 'Locked Achievement'}</span>
+        </div>
+      `;
+      container.appendChild(card);
     });
   }
 
@@ -182,6 +277,11 @@ export class UIManager {
     // Refresh skin status states when entering Skin Select screen
     if (currentState === GameState.SKIN_SELECT) {
       this.syncSkinUI();
+    }
+
+    // Refresh trophy cabinet list when entering Trophy Cabinet screen
+    if (currentState === GameState.TROPHY_CABINET) {
+      this.syncTrophyUI();
     }
   }
 

@@ -130,6 +130,8 @@ describe('1) State Machine Transition Stress & Invalidation Matrix', () => {
       else if (state === GameState.GAME_OVER) { sm.setState(GameState.START); sm.setState(GameState.PLAYING); sm.setState(GameState.GAME_OVER); }
       else if (state === GameState.SKIN_SELECT) { sm.setState(GameState.START); sm.setState(GameState.SKIN_SELECT); }
       else if (state === GameState.SETTINGS) { sm.setState(GameState.START); sm.setState(GameState.SETTINGS); }
+      else if (state === GameState.MODE_SELECT) { sm.setState(GameState.START); sm.setState(GameState.MODE_SELECT); }
+      else if (state === GameState.TROPHY_CABINET) { sm.setState(GameState.START); sm.setState(GameState.TROPHY_CABINET); }
 
       assert.equal(sm.canTransition(state), false, `Self-transition to ${state} should be false`);
       assert.equal(sm.setState(state), false, `setState(${state}) while in ${state} should return false`);

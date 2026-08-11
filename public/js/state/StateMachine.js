@@ -9,16 +9,20 @@ export const GameState = {
   PAUSED: 'PAUSED',
   GAME_OVER: 'GAME_OVER',
   SKIN_SELECT: 'SKIN_SELECT',
-  SETTINGS: 'SETTINGS'
+  SETTINGS: 'SETTINGS',
+  MODE_SELECT: 'MODE_SELECT',
+  TROPHY_CABINET: 'TROPHY_CABINET'
 };
 
 const VALID_TRANSITIONS = {
-  [GameState.START]: [GameState.PLAYING, GameState.SKIN_SELECT, GameState.SETTINGS],
+  [GameState.START]: [GameState.PLAYING, GameState.SKIN_SELECT, GameState.SETTINGS, GameState.MODE_SELECT, GameState.TROPHY_CABINET],
   [GameState.PLAYING]: [GameState.PAUSED, GameState.GAME_OVER],
   [GameState.PAUSED]: [GameState.PLAYING, GameState.START, GameState.SETTINGS],
   [GameState.GAME_OVER]: [GameState.START, GameState.PLAYING],
   [GameState.SKIN_SELECT]: [GameState.START],
-  [GameState.SETTINGS]: [GameState.START, GameState.PAUSED]
+  [GameState.SETTINGS]: [GameState.START, GameState.PAUSED],
+  [GameState.MODE_SELECT]: [GameState.START],
+  [GameState.TROPHY_CABINET]: [GameState.START]
 };
 
 export class StateMachine {

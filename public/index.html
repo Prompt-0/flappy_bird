@@ -14,6 +14,9 @@
     <!-- In-Game HUD Score Display -->
     <div id="hud-score" data-testid="score-display" class="hud-score">0</div>
 
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- 1. Start Screen Modal -->
     <div id="start-screen" data-testid="start-screen" class="overlay-screen active">
       <div class="modal-card bounce-in">
@@ -21,7 +24,9 @@
         <p class="subtitle">Press Space or Tap to Flap</p>
         <div class="button-group">
           <button id="start-button" data-testid="start-button" class="btn btn-primary">Play</button>
+          <button id="mode-button" data-testid="mode-button" class="btn btn-secondary">Modes</button>
           <button id="skin-select-button" data-testid="skin-select-button" class="btn btn-secondary">Skins</button>
+          <button id="trophy-button" data-testid="trophy-button" class="btn btn-secondary">Trophies</button>
           <button id="settings-button" data-testid="settings-button" class="btn btn-secondary">Settings</button>
         </div>
       </div>
@@ -115,6 +120,50 @@
         </div>
         <div class="button-group">
           <button id="close-settings-button" data-testid="close-settings-button" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Mode Select Screen Modal -->
+    <div id="mode-screen" data-testid="mode-screen" class="overlay-screen hidden">
+      <div class="modal-card pop-in">
+        <h2 class="modal-title">Select Game Mode</h2>
+        <div class="mode-list">
+          <button id="mode-classic-btn" class="mode-card selected">
+            <span class="mode-tag">MODE</span>
+            <div class="mode-info">
+              <span class="mode-title">Classic Endless</span>
+              <span class="mode-desc">Standard 1-life high score flappy action.</span>
+            </div>
+          </button>
+          <button id="mode-challenge-btn" class="mode-card">
+            <span class="mode-tag stage">STAGE</span>
+            <div class="mode-info">
+              <span class="mode-title">Challenge Mode</span>
+              <span class="mode-desc">10 progressive levels with target scores.</span>
+            </div>
+          </button>
+          <button id="mode-zen-btn" class="mode-card">
+            <span class="mode-tag zen">ZEN</span>
+            <div class="mode-info">
+              <span class="mode-title">Zen Practice</span>
+              <span class="mode-desc">Invincible bird for relaxed practice.</span>
+            </div>
+          </button>
+        </div>
+        <div class="button-group">
+          <button id="close-mode-button" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Trophy Cabinet Showcase Modal -->
+    <div id="trophy-screen" data-testid="trophy-screen" class="overlay-screen hidden">
+      <div class="modal-card pop-in">
+        <h2 class="modal-title">Trophy Cabinet</h2>
+        <div id="trophy-list" class="trophy-list"></div>
+        <div class="button-group">
+          <button id="close-trophy-button" class="btn btn-secondary">Back</button>
         </div>
       </div>
     </div>

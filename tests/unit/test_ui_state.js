@@ -51,10 +51,10 @@ const indexHtmlContent = fs.readFileSync(indexPath, 'utf-8');
 // Suite 1: State Machine States & Lifecycle
 // ==========================================
 describe('1) StateMachine States, Transitions & Lifecycle Hooks', () => {
-  test('StateMachine initial state is START and exposes all 6 states', () => {
+  test('StateMachine initial state is START and exposes all states', () => {
     const sm = new StateMachine();
     assert.equal(sm.getState(), GameState.START);
-    assert.deepEqual(Object.keys(GameState), ['START', 'PLAYING', 'PAUSED', 'GAME_OVER', 'SKIN_SELECT', 'SETTINGS']);
+    assert.deepEqual(Object.keys(GameState), ['START', 'PLAYING', 'PAUSED', 'GAME_OVER', 'SKIN_SELECT', 'SETTINGS', 'MODE_SELECT', 'TROPHY_CABINET']);
   });
 
   test('StateMachine permits valid state transitions', () => {
