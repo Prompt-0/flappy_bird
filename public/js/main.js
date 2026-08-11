@@ -42,6 +42,8 @@ export function initGame() {
       getState: () => stateMachine.getState(),
       getScore: () => gameEngine.score,
       getHighScore: () => gameEngine.highScore,
+      getEngine: () => gameEngine,
+      getPowerUps: () => gameEngine.powerUpManager ? gameEngine.powerUpManager.activeItems : [],
       getBird: () => ({
         x: gameEngine.bird.x,
         y: gameEngine.bird.y,

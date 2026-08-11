@@ -28,6 +28,7 @@ export class PowerUpManager {
     this.hoverTimer = 0;
 
     if (this.eventBus) {
+      this.eventBus.on('PIPE_SPAWN', (data) => this.onPipeSpawned(data));
       this.eventBus.on('PIPE_SPAWNED', (data) => this.onPipeSpawned(data));
     }
   }
@@ -46,17 +47,20 @@ export class PowerUpManager {
 
   onPipeSpawned(data) {
     if (!data || typeof data.x !== 'number') return;
-    // 35% chance to spawn a power-up in a pipe gap
-    if (Math.random() > 0.35) return;
+    // 50% chance to spawn a power-up in a pipe gap
+    if (Math.random() > 0.50) return;
 
     const types = [PowerUpType.SHIELD, PowerUpType.STAR, PowerUpType.SLOW_MO];
     const type = types[Math.floor(Math.random() * types.length)];
+    const topH = (typeof data.topHeight === 'number') ? data.topHeight : (data.gapTop || 100);
+    const gapH = (typeof data.gapHeight === 'number') ? data.gapHeight : 135;
+
     const item = {
       id: `powerup_${Date.now()}_${Math.random()}`,
       type,
-      x: data.x + 26, // Center of 52px wide pipe
-      y: data.gapTop + data.gapHeight / 2,
-      baseY: data.gapTop + data.gapHeight / 2,
+      x: data.x + 32, // Center of 64px wide pipe
+      y: topH + gapH / 2,
+      baseY: topH + gapH / 2,
       collected: false
     };
 
@@ -117,7 +121,7 @@ export class PowerUpManager {
     } else if (type === PowerUpType.STAR) {
       this.activeEffects.scoreMultiplier = 2;
       this.activeEffects.starTimer = 5.0; // 5 seconds double score
-      if (this.eventBus) this.eventBus.emit('POWERUP_COLLECTED', { type, title: '2x Score Star ⭐ (+5 PTS)' });
+      if (this.eventBus) this.eventBus.emit('POWERUP_COLLECTED', { type, title: '2x Score Star ⭐' });
     } else if (type === PowerUpType.SLOW_MO) {
       this.activeEffects.isSlowMo = true;
       this.activeEffects.slowMoTimer = 6.0; // 6 seconds slow motion
@@ -144,8 +148,8 @@ export class PowerUpManager {
       // Glow backdrop
       ctx.beginPath();
       ctx.arc(0, 0, this.itemRadius + 4, 0, Math.PI * 2);
-      ctx.fillStyle = item.type === PowerUpType.SHIELD ? 'rgba(56, 189, 248, 0.35)' :
-                      item.type === PowerUpType.STAR ? 'rgba(250, 204, 21, 0.35)' : 'rgba(168, 85, 247, 0.35)';
+      ctx.fillStyle = item.type === PowerUpType.SHIELD ? 'rgba(56, 189, 248, 0.45)' :
+                      item.type === PowerUpType.STAR ? 'rgba(250, 204, 21, 0.45)' : 'rgba(168, 85, 247, 0.45)';
       ctx.fill();
 
       // Item Badge Circle
@@ -154,17 +158,17 @@ export class PowerUpManager {
       ctx.fillStyle = item.type === PowerUpType.SHIELD ? '#0284c7' :
                       item.type === PowerUpType.STAR ? '#d97706' : '#7e22ce';
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.fill();
       ctx.stroke();
 
-      // Icon Symbol Text
+      // Badge Symbol / Text Label
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px sans-serif';
+      ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const icon = item.type === PowerUpType.SHIELD ? '🛡️' : item.type === PowerUpType.STAR ? '⭐' : '⏳';
-      ctx.fillText(icon, 0, 1);
+      const label = item.type === PowerUpType.SHIELD ? 'SHD' : item.type === PowerUpType.STAR ? '2X' : 'SLOW';
+      ctx.fillText(label, 0, 1);
 
       ctx.restore();
     });
