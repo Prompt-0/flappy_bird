@@ -57,12 +57,12 @@ export class UIManager {
         this.updateVisibility(newState);
       });
 
-      this.eventBus.on('ACHIEVEMENT_UNLOCKED', ({ title, description, icon }) => {
-        this.showToast(title, description, icon);
+      this.eventBus.on('ACHIEVEMENT_UNLOCKED', ({ title, description }) => {
+        this.showToast(title, description, 'UNLOCK');
       });
 
       this.eventBus.on('POWERUP_COLLECTED', ({ title }) => {
-        this.showToast('POWER-UP!', title, '⚡');
+        this.showToast('POWER-UP!', title, 'POWERUP');
       });
     }
   }
@@ -197,7 +197,7 @@ export class UIManager {
     });
   }
 
-  showToast(title, description, icon = '🏆') {
+  showToast(title, description, badgeText = 'AWARD') {
     if (!this.doc) return;
     const container = this.doc.getElementById('toast-container');
     if (!container) return;
@@ -205,7 +205,7 @@ export class UIManager {
     const toast = this.doc.createElement('div');
     toast.className = 'toast-item';
     toast.innerHTML = `
-      <span class="toast-icon">${icon}</span>
+      <span class="toast-badge">${badgeText}</span>
       <div class="toast-body">
         <span class="toast-title">${title}</span>
         <span class="toast-desc">${description}</span>

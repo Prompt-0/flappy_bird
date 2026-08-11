@@ -40,6 +40,7 @@ export class GameEngine {
     this.score = 0;
     this.highScore = this.storageEngine.getHighScore();
     this.initialHighScore = this.highScore;
+    this.invulnerableTimer = 0;
 
     // Logical dimensions
     this.width = 360;
@@ -67,11 +68,10 @@ export class GameEngine {
     }
 
     // Subscribe to gameplay events for particle FX and score tracking
-    this.eventBus.on('PIPE_PASS', (data) => {
+    this.eventBus.on('PIPE_PASS', () => {
       if (this.state === EngineState.PLAYING) {
         const mult = (this.powerUpManager && this.powerUpManager.activeEffects.scoreMultiplier) || 1;
-        const addScore = (data && typeof data.score === 'number') ? (data.score - this.score) : 1;
-        this.score += Math.max(1, addScore) * mult;
+        this.score += 1 * mult;
 
         if (this.score > this.highScore) {
           this.highScore = this.score;
@@ -135,8 +135,10 @@ export class GameEngine {
       this.powerUpManager.reset();
       this.particleEngine.reset();
       this.hoverTimer = 0;
+      this.invulnerableTimer = 0;
     } else if (newState === EngineState.PLAYING && oldState === EngineState.START) {
       this.initialHighScore = this.highScore;
+      this.invulnerableTimer = 0;
     } else if (newState === EngineState.GAME_OVER) {
       if (this.storageEngine) {
         this.storageEngine.setHighScore(this.highScore);
@@ -175,20 +177,32 @@ export class GameEngine {
       this.parallax.update(dt, 80);
       this.particleEngine.update(dt);
     } else if (this.state === EngineState.PLAYING) {
-      this.bird.update(dt);
-      this.pipeManager.update(dt, this.bird.x);
+      if (this.invulnerableTimer > 0) {
+        this.invulnerableTimer -= dt;
+      }
+
+      const effectiveDt = (this.powerUpManager && this.powerUpManager.activeEffects.isSlowMo)
+        ? dt * 0.60
+        : dt;
+
+      this.bird.update(effectiveDt);
+      this.pipeManager.update(effectiveDt, this.bird.x);
       this.powerUpManager.update(dt, this.pipeManager.scrollSpeed, this.bird);
-      this.parallax.update(dt, 160);
+      this.parallax.update(effectiveDt, 160);
       this.particleEngine.update(dt);
 
-      const hit = CollisionSystem.checkAll(this.bird, this.pipeManager.getPipes(), this.playHeight);
+      const hit = (this.invulnerableTimer <= 0)
+        ? CollisionSystem.checkAll(this.bird, this.pipeManager.getPipes(), this.playHeight)
+        : { collided: false };
+
       if (hit.collided) {
         if (this.gameModeManager && this.gameModeManager.currentMode === 'ZEN') {
           // Zen mode: soft bounce without game over
           this.bird.vy = -220;
         } else if (this.powerUpManager && this.powerUpManager.consumeShield()) {
-          // Shield absorbed collision!
-          this.bird.vy = -280;
+          // Shield absorbed collision! Give invulnerability window to clear pipe
+          this.bird.vy = -260;
+          this.invulnerableTimer = 0.6; // 0.6s grace period
           this.particleEngine.emitCollisionBurst(this.bird.x, this.bird.y);
         } else {
           this.bird.isDead = true;
@@ -229,7 +243,13 @@ export class GameEngine {
     this.pipeManager.render(this.ctx);
     this.powerUpManager.render(this.ctx);
     this.particleEngine.render(this.ctx);
+
+    // Render bird (flash during invulnerability)
+    if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
+      this.ctx.globalAlpha = 0.4;
+    }
     this.bird.render(this.ctx);
+    this.ctx.globalAlpha = 1.0;
 
     // 3. Render Shield Bubble Aura around Bird
     if (this.powerUpManager && this.powerUpManager.activeEffects.hasShield && !this.bird.isDead) {
@@ -242,6 +262,35 @@ export class GameEngine {
       this.ctx.shadowBlur = 12;
       this.ctx.stroke();
       this.ctx.restore();
+    }
+
+    // 4. Render Active Power-Up Effects HUD (Top Right)
+    if (this.powerUpManager && this.state === EngineState.PLAYING) {
+      const fx = this.powerUpManager.activeEffects;
+      const activePills = [];
+      if (fx.hasShield) activePills.push({ text: '🛡️ SHIELD', color: '#0284c7' });
+      if (fx.starTimer > 0) activePills.push({ text: `⭐ 2X (${fx.starTimer.toFixed(1)}s)`, color: '#d97706' });
+      if (fx.slowMoTimer > 0) activePills.push({ text: `⏳ SLOW (${fx.slowMoTimer.toFixed(1)}s)`, color: '#7e22ce' });
+
+      if (activePills.length > 0) {
+        this.ctx.save();
+        let currY = 20;
+        activePills.forEach(pill => {
+          this.ctx.fillStyle = pill.color;
+          this.ctx.fillRect(this.width - 98, currY, 88, 20);
+          this.ctx.strokeStyle = '#ffffff';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.strokeRect(this.width - 98, currY, 88, 20);
+
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.font = 'bold 9px sans-serif';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText(pill.text, this.width - 54, currY + 10);
+          currY += 24;
+        });
+        this.ctx.restore();
+      }
     }
   }
 

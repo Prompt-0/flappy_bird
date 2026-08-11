@@ -358,8 +358,14 @@ html, body {
   animation: slideDownToast 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.toast-icon {
-  font-size: 1.5rem;
+.toast-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #facc15;
+  color: #0f172a;
+  letter-spacing: 0.5px;
 }
 
 .toast-body {
