@@ -75,6 +75,10 @@ export class AudioManager {
     this.eventBus.on('BIRD_FLAP', () => this.playFlap());
     this.eventBus.on('PIPE_PASS', () => this.playScore());
     this.eventBus.on('BIRD_HIT', () => this.playHit());
+    this.eventBus.on('POWERUP_COLLECTED', () => this.playPowerUp());
+    this.eventBus.on('SHIELD_BROKEN', () => this.playHit());
+    this.eventBus.on('ACHIEVEMENT_UNLOCKED', () => this.playAchievement());
+    this.eventBus.on('CHALLENGE_LEVEL_CLEARED', () => this.playAchievement());
   }
 
   updateMasterGain() {
@@ -131,5 +135,15 @@ export class AudioManager {
   playClick() {
     if (this.muted) return;
     this.synth.playClick();
+  }
+
+  playPowerUp() {
+    if (this.muted) return;
+    this.synth.playPowerUp();
+  }
+
+  playAchievement() {
+    if (this.muted) return;
+    this.synth.playAchievement();
   }
 }

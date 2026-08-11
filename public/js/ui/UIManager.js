@@ -87,6 +87,7 @@ export class UIManager {
     // Cache dynamic UI elements
     this.elements = {
       hudScore: this._getByTestId('score-display') || this.doc.getElementById('hud-score'),
+      hudPauseButton: this._getByTestId('hud-pause-button') || this.doc.getElementById('hud-pause-button'),
       finalScore: this._getByTestId('final-score') || this.doc.getElementById('final-score'),
       bestScore: this._getByTestId('high-score-display') || this.doc.getElementById('best-score'),
       soundToggle: this._getByTestId('mute-btn') || this._getByTestId('sound-toggle') || this.doc.getElementById('sound-toggle'),
@@ -108,12 +109,19 @@ export class UIManager {
     const addClick = (el, handler) => {
       if (!el) return;
       el.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (this.gameEngine && this.gameEngine.audioManager) {
           this.gameEngine.audioManager.playClick();
         }
         handler(e);
       });
     };
+
+    addClick(this.elements.hudPauseButton, () => {
+      if (this.stateMachine && this.stateMachine.getState() === GameState.PLAYING) {
+        this.stateMachine.setState(GameState.PAUSED);
+      }
+    });
 
     addClick(this.elements.startButton, () => {
       if (this.stateMachine) this.stateMachine.setState(GameState.PLAYING);
@@ -267,6 +275,15 @@ export class UIManager {
         }
       }
     });
+
+    // Toggle in-game pause button visibility
+    if (this.elements && this.elements.hudPauseButton) {
+      if (currentState === GameState.PLAYING) {
+        this.elements.hudPauseButton.classList.remove('hidden');
+      } else {
+        this.elements.hudPauseButton.classList.add('hidden');
+      }
+    }
 
     // Update score displays when entering Game Over
     if (currentState === GameState.GAME_OVER && this.gameEngine) {

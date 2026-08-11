@@ -41,6 +41,7 @@ export class GameEngine {
     this.highScore = this.storageEngine.getHighScore();
     this.initialHighScore = this.highScore;
     this.invulnerableTimer = 0;
+    this.screenShakeTimer = 0;
 
     // Logical dimensions
     this.width = 360;
@@ -88,6 +89,7 @@ export class GameEngine {
 
     this.eventBus.on('BIRD_HIT', () => {
       this.particleEngine.emitCollisionBurst(this.bird.x, this.bird.y);
+      this.screenShakeTimer = 0.25; // 250ms camera shake
     });
 
     this.eventBus.on('SKIN_CHANGED', ({ skinId }) => {
@@ -170,6 +172,10 @@ export class GameEngine {
   }
 
   updatePhysics(dt) {
+    if (this.screenShakeTimer > 0) {
+      this.screenShakeTimer -= dt;
+    }
+
     if (this.state === EngineState.START) {
       this.hoverTimer += dt;
       this.bird.y = 250 + Math.sin(this.hoverTimer * 5) * 6;
@@ -204,6 +210,7 @@ export class GameEngine {
           this.bird.vy = -260;
           this.invulnerableTimer = 0.6; // 0.6s grace period
           this.particleEngine.emitCollisionBurst(this.bird.x, this.bird.y);
+          this.screenShakeTimer = 0.2;
         } else {
           this.bird.isDead = true;
           this.eventBus.emit('BIRD_HIT', { x: this.bird.x, y: this.bird.y, cause: hit.cause });
@@ -235,6 +242,15 @@ export class GameEngine {
   render() {
     if (!this.ctx) return;
     this.ctx.clearRect(0, 0, this.width, this.height);
+
+    this.ctx.save();
+
+    // Camera screen shake offset
+    if (this.screenShakeTimer > 0) {
+      const shakeX = (Math.random() * 8 - 4);
+      const shakeY = (Math.random() * 8 - 4);
+      this.ctx.translate(shakeX, shakeY);
+    }
 
     // 1. Multi-layer Parallax & Weather Background
     this.parallax.render(this.ctx);
@@ -268,9 +284,9 @@ export class GameEngine {
     if (this.powerUpManager && this.state === EngineState.PLAYING) {
       const fx = this.powerUpManager.activeEffects;
       const activePills = [];
-      if (fx.hasShield) activePills.push({ text: '🛡️ SHIELD', color: '#0284c7' });
-      if (fx.starTimer > 0) activePills.push({ text: `⭐ 2X (${fx.starTimer.toFixed(1)}s)`, color: '#d97706' });
-      if (fx.slowMoTimer > 0) activePills.push({ text: `⏳ SLOW (${fx.slowMoTimer.toFixed(1)}s)`, color: '#7e22ce' });
+      if (fx.hasShield) activePills.push({ text: 'SHIELD', color: '#0284c7' });
+      if (fx.starTimer > 0) activePills.push({ text: `2X (${fx.starTimer.toFixed(1)}s)`, color: '#d97706' });
+      if (fx.slowMoTimer > 0) activePills.push({ text: `SLOW (${fx.slowMoTimer.toFixed(1)}s)`, color: '#7e22ce' });
 
       if (activePills.length > 0) {
         this.ctx.save();
@@ -292,6 +308,8 @@ export class GameEngine {
         this.ctx.restore();
       }
     }
+
+    this.ctx.restore();
   }
 
   start() {
