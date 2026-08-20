@@ -1,3 +1,6 @@
 ## 2026-08-19 - Collision System Object Allocation Trap
 **Learning:** When trying to eliminate per-frame object allocation (like replacing a `getBoundingCircle()` call with passing the bare object), blindly swapping the call for the object itself is dangerous. You must ensure that you aren't bypassing critical logic (like a fallback radius default) or ignoring custom hit-box implementations if the object implements a specific bounds method.
 **Action:** Next time I attempt to remove an object allocation by passing a raw entity instead of its method result, I will verify that the fallback logic (e.g. `radius || 13`) is preserved and that I respect the original method if it's implemented (using `const bounds = obj.method ? obj.method() : obj`).
+## 2024-05-24 - Per-frame GC stutter from object allocations
+**Learning:** Returning fresh objects (`{x, y, radius}`, `[]`, etc.) from hot-path functions like `getBoundingCircle`, `checkAll`, and `getSkyColors` causes significant GC churn when called 60+ times per second in a game loop.
+**Action:** Always look for opportunities to pre-allocate `this._cached` objects in constructors and mutate/return them in hot loops to maintain a zero-allocation architecture. Watch out for unit tests that assume fresh object references (extract primitives for assertions instead).

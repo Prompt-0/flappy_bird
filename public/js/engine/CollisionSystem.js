@@ -5,6 +5,9 @@
  * Ceiling boundary clamp (y - r <= 0)
  */
 export class CollisionSystem {
+  // ⚡ Bolt: Cache standard 'no collision' result to prevent per-frame object allocation
+  static NO_COLLISION = { collided: false, cause: null };
+
   /**
    * Circle vs Axis-Aligned Bounding Box (AABB) Distance Calculation.
    * Finds nearest point on AABB to circle center and tests distance squared: d² < r²
@@ -138,6 +141,7 @@ export class CollisionSystem {
       }
     }
 
-    return { collided: false, cause: null };
+    // ⚡ Bolt: Return cached NO_COLLISION instead of creating new object { collided: false, cause: null }
+    return this.NO_COLLISION;
   }
 }

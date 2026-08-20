@@ -197,9 +197,10 @@ export class GameEngine {
       this.parallax.update(effectiveDt, 160);
       this.particleEngine.update(dt);
 
+      // ⚡ Bolt: Use cached CollisionSystem.NO_COLLISION instead of new object { collided: false }
       const hit = (this.invulnerableTimer <= 0)
         ? CollisionSystem.checkAll(this.bird, this.pipeManager.getPipes(), this.playHeight)
-        : { collided: false };
+        : CollisionSystem.NO_COLLISION;
 
       if (hit.collided) {
         if (this.gameModeManager && this.gameModeManager.currentMode === 'ZEN') {
