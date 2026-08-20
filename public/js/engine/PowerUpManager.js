@@ -103,9 +103,11 @@ export class PowerUpManager {
       if (!item.collected && bird && !bird.isDead) {
         const dx = bird.x - item.x;
         const dy = bird.y - item.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
+        const rSum = bird.radius + this.itemRadius;
 
-        if (dist < bird.radius + this.itemRadius) {
+        // Use distance squared to avoid expensive Math.sqrt calls
+        if (distSq < rSum * rSum) {
           item.collected = true;
           this.applyPowerUp(item.type, bird);
           this.activeItems.splice(i, 1);

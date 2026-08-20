@@ -84,7 +84,10 @@ export class CollisionSystem {
    * @returns {boolean} True if collision detected
    */
   static checkPipeCollision(bird, pipePair) {
-    const circle = bird.getBoundingCircle ? bird.getBoundingCircle() : { x: bird.x, y: bird.y, radius: bird.radius || 13 };
+    // Avoid object allocation per frame if possible, but respect getBoundingCircle if it exists.
+    // If we must create an object, fallback radius to 13.
+    const circle = bird.getBoundingCircle ? bird.getBoundingCircle() : bird;
+    if (circle.radius === undefined) circle.radius = 13;
 
     const topBox = pipePair.topPipe || {
       rx: pipePair.x,
@@ -121,7 +124,14 @@ export class CollisionSystem {
 
     // 3. Pipe collision check
     if (pipes && pipes.length > 0) {
+      const birdR = bird.radius !== undefined ? bird.radius : 13;
       for (const pipePair of pipes) {
+        // Broad-phase AABB horizontal bounds check to skip far pipes
+        const pipeRight = pipePair.x + (pipePair.width || 64);
+        if (bird.x + birdR < pipePair.x || bird.x - birdR > pipeRight) {
+          continue;
+        }
+
         if (this.checkPipeCollision(bird, pipePair)) {
           return { collided: true, cause: 'pipe' };
         }
