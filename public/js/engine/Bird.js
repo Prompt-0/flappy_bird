@@ -29,6 +29,9 @@ export class Bird {
       outline: '#553C00'
     };
 
+    // ⚡ Bolt: Pre-allocate bounding circle to prevent per-frame allocation
+    this._boundingCircle = { x: 0, y: 0, radius: 0 };
+
     this.reset(this.initialX, this.initialY);
   }
 
@@ -78,11 +81,11 @@ export class Bird {
   }
 
   getBoundingCircle() {
-    return {
-      x: this.x,
-      y: this.y,
-      radius: this.radius
-    };
+    // ⚡ Bolt: Re-use cached object to avoid allocations in hot paths
+    this._boundingCircle.x = this.x;
+    this._boundingCircle.y = this.y;
+    this._boundingCircle.radius = this.radius;
+    return this._boundingCircle;
   }
 
   render(ctx) {

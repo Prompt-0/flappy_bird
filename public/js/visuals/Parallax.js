@@ -80,6 +80,15 @@ export class Parallax {
       twinklePhase: Math.random() * Math.PI * 2,
       currentAlpha: 0.5
     }));
+
+    // ⚡ Bolt: Cache objects to avoid per-frame allocations during rendering
+    this._cachedSkyColors = [null, null];
+    this._cachedSkyColors.top = null;
+    this._cachedSkyColors.bottom = null;
+    this._lastPhaseStr = null;
+    this._lastTransitionProgress = -1;
+
+    this._cachedCelestial = { x: 0, y: 0, angle: 0, type: '' };
   }
 
   update(dt, scrollSpeed = 160) {
@@ -158,18 +167,29 @@ export class Parallax {
   }
 
   getSkyColors() {
+    const phaseStr = `${this.currentPhase}-${this.targetPhase}`;
+    const t = (this.currentPhase === this.targetPhase) ? 1.0 : this.phaseTransitionProgress;
+
+    // ⚡ Bolt: Return cached sky colors if phase and transition progress haven't changed
+    if (this._lastPhaseStr === phaseStr && this._lastTransitionProgress === t) {
+      return this._cachedSkyColors;
+    }
+
     const paletteCurrent = SKY_PALETTES[this.currentPhase] || SKY_PALETTES[WeatherPhase.DAY];
     const paletteTarget = SKY_PALETTES[this.targetPhase] || paletteCurrent;
-
-    const t = (this.currentPhase === this.targetPhase) ? 1.0 : this.phaseTransitionProgress;
 
     const top = lerpColor(paletteCurrent.top, paletteTarget.top, t);
     const bottom = lerpColor(paletteCurrent.bottom, paletteTarget.bottom, t);
 
-    const result = [top, bottom];
-    result.top = top;
-    result.bottom = bottom;
-    return result;
+    this._cachedSkyColors[0] = top;
+    this._cachedSkyColors[1] = bottom;
+    this._cachedSkyColors.top = top;
+    this._cachedSkyColors.bottom = bottom;
+
+    this._lastPhaseStr = phaseStr;
+    this._lastTransitionProgress = t;
+
+    return this._cachedSkyColors;
   }
 
   getCelestialPosition() {
@@ -199,12 +219,13 @@ export class Parallax {
     const x = cx - rx * Math.cos(angle);
     const y = horizonY - arcHeight * Math.sin(angle);
 
-    return {
-      x,
-      y,
-      angle,
-      type: celestialType
-    };
+    // ⚡ Bolt: Reuse cached celestial position object instead of creating new one
+    this._cachedCelestial.x = x;
+    this._cachedCelestial.y = y;
+    this._cachedCelestial.angle = angle;
+    this._cachedCelestial.type = celestialType;
+
+    return this._cachedCelestial;
   }
 
   render(ctx) {

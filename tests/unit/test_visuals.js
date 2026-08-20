@@ -242,12 +242,15 @@ describe('C) Day/Night Weather Cycle & Celestial Arc', () => {
 
     parallax.setPhase('DAY');
     const dayColors = parallax.getSkyColors();
-    assert.ok(dayColors.top.startsWith('rgb('), `Top sky color must be rgb string, got ${dayColors.top}`);
-    assert.ok(dayColors.bottom.startsWith('rgb('), `Bottom sky color must be rgb string, got ${dayColors.bottom}`);
+    const dayTop = dayColors.top;
+    const dayBottom = dayColors.bottom;
+    assert.ok(dayTop.startsWith('rgb('), `Top sky color must be rgb string, got ${dayTop}`);
+    assert.ok(dayBottom.startsWith('rgb('), `Bottom sky color must be rgb string, got ${dayBottom}`);
 
     parallax.setPhase('NIGHT');
     const nightColors = parallax.getSkyColors();
-    assert.notEqual(dayColors.top, nightColors.top, 'Night sky colors must differ from Day sky colors');
+    const nightTop = nightColors.top;
+    assert.notEqual(dayTop, nightTop, 'Night sky colors must differ from Day sky colors');
   });
 
   test('Celestial orbital arc math: computes smooth arc positions for Sun and Moon', () => {
