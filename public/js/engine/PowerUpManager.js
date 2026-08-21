@@ -143,7 +143,9 @@ export class PowerUpManager {
   render(ctx) {
     if (!ctx) return;
 
-    this.activeItems.forEach(item => {
+    // ⚡ Bolt: Removed per-frame .forEach closure allocation
+    for (let i = 0; i < this.activeItems.length; i++) {
+      const item = this.activeItems[i];
       ctx.save();
       ctx.translate(item.x, item.y);
 
@@ -173,6 +175,6 @@ export class PowerUpManager {
       ctx.fillText(label, 0, 1);
 
       ctx.restore();
-    });
+    }
   }
 }

@@ -299,16 +299,13 @@ export class GameEngine {
     // 4. Render Active Power-Up Effects HUD (Top Right)
     if (this.powerUpManager && this.state === EngineState.PLAYING) {
       const fx = this.powerUpManager.activeEffects;
-      const activePills = [];
-      if (fx.hasShield) activePills.push({ text: 'SHIELD', color: '#0284c7' });
-      if (fx.starTimer > 0) activePills.push({ text: `2X (${fx.starTimer.toFixed(1)}s)`, color: '#d97706' });
-      if (fx.slowMoTimer > 0) activePills.push({ text: `SLOW (${fx.slowMoTimer.toFixed(1)}s)`, color: '#7e22ce' });
-
-      if (activePills.length > 0) {
+      // ⚡ Bolt: Removed per-frame array and object allocations for pills
+      if (fx.hasShield || fx.starTimer > 0 || fx.slowMoTimer > 0) {
         this.ctx.save();
         let currY = 20;
-        activePills.forEach(pill => {
-          this.ctx.fillStyle = pill.color;
+
+        const drawPill = (text, color) => {
+          this.ctx.fillStyle = color;
           this.ctx.fillRect(this.width - 98, currY, 88, 20);
           this.ctx.strokeStyle = '#ffffff';
           this.ctx.lineWidth = 1.5;
@@ -318,9 +315,14 @@ export class GameEngine {
           this.ctx.font = 'bold 9px sans-serif';
           this.ctx.textAlign = 'center';
           this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(pill.text, this.width - 54, currY + 10);
+          this.ctx.fillText(text, this.width - 54, currY + 10);
           currY += 24;
-        });
+        };
+
+        if (fx.hasShield) drawPill('SHIELD', '#0284c7');
+        if (fx.starTimer > 0) drawPill(`2X (${fx.starTimer.toFixed(1)}s)`, '#d97706');
+        if (fx.slowMoTimer > 0) drawPill(`SLOW (${fx.slowMoTimer.toFixed(1)}s)`, '#7e22ce');
+
         this.ctx.restore();
       }
     }
