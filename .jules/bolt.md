@@ -4,3 +4,6 @@
 ## 2024-05-24 - Per-frame GC stutter from object allocations
 **Learning:** Returning fresh objects (`{x, y, radius}`, `[]`, etc.) from hot-path functions like `getBoundingCircle`, `checkAll`, and `getSkyColors` causes significant GC churn when called 60+ times per second in a game loop.
 **Action:** Always look for opportunities to pre-allocate `this._cached` objects in constructors and mutate/return them in hot loops to maintain a zero-allocation architecture. Watch out for unit tests that assume fresh object references (extract primitives for assertions instead).
+## 2024-11-20 - UI Render Loop Array/Closure Allocations
+**Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
+**Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
