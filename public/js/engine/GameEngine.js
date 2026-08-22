@@ -269,10 +269,13 @@ export class GameEngine {
       const shadowWidth = (this.bird.radius * 1.4) * (0.5 + 0.5 * heightRatio);
       const shadowAlpha = 0.25 * heightRatio;
 
-      this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha.toFixed(2)})`;
+      // ⚡ Bolt: Removed per-frame string allocation for drop shadow
+      this.ctx.globalAlpha = shadowAlpha;
+      this.ctx.fillStyle = '#000000';
       this.ctx.beginPath();
       this.ctx.ellipse(this.bird.x, shadowY, shadowWidth, shadowWidth * 0.35, 0, 0, Math.PI * 2);
       this.ctx.fill();
+      this.ctx.globalAlpha = 1.0;
       this.ctx.restore();
     }
 
