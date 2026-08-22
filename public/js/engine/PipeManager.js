@@ -101,7 +101,12 @@ export class PipeManager {
     this.checkScoring(birdX);
 
     // 4. Recycle offscreen pipes
-    this.pipes = this.pipes.filter(p => p.x + this.pipeWidth > 0);
+    // ⚡ Bolt: Replaced .filter with in-place splice to avoid array and closure allocation per frame
+    for (let i = this.pipes.length - 1; i >= 0; i--) {
+      if (this.pipes[i].x + this.pipeWidth <= 0) {
+        this.pipes.splice(i, 1);
+      }
+    }
   }
 
   getPipes() {
