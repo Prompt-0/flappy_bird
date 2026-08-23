@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2024-05-24 - [Avoid dynamic rgba() allocations in hot Canvas render loops]
+**Learning:** Using dynamic `rgba()` strings (e.g., `rgba(0,0,0,${alpha})`) inside hot render paths like `GameEngine.render` causes constant string allocation and GC (garbage collection) stutters. This architectural bottleneck interrupts the 60fps loop.
+**Action:** Always prefer setting `ctx.globalAlpha` along with a static hex color string (`#000000`), then resetting `ctx.globalAlpha = 1.0` to avoid state bleeding.

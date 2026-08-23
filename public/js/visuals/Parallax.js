@@ -265,28 +265,33 @@ export class Parallax {
       ctx.restore();
 
       // 2. Outer Sun Corona Halo
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.18)';
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = '#ffea64';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 42, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Middle Glow
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.35)';
+      ctx.globalAlpha = 0.35;
+      // ctx.fillStyle = '#ffea64'; // Already set above
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // 4. Core Sun Disk
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#fff7ed';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 20, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Moon Outer Halo
-      ctx.fillStyle = 'rgba(240, 243, 244, 0.2)';
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
+      ctx.globalAlpha = 1.0;
 
       // Moon Body
       ctx.fillStyle = '#f0f3f4';

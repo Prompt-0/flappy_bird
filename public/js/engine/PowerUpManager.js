@@ -150,11 +150,13 @@ export class PowerUpManager {
       ctx.translate(item.x, item.y);
 
       // Glow backdrop
+      ctx.globalAlpha = 0.45;
       ctx.beginPath();
       ctx.arc(0, 0, this.itemRadius + 4, 0, Math.PI * 2);
-      ctx.fillStyle = item.type === PowerUpType.SHIELD ? 'rgba(56, 189, 248, 0.45)' :
-                      item.type === PowerUpType.STAR ? 'rgba(250, 204, 21, 0.45)' : 'rgba(168, 85, 247, 0.45)';
+      ctx.fillStyle = item.type === PowerUpType.SHIELD ? '#38bdf8' :
+                      item.type === PowerUpType.STAR ? '#facc15' : '#a855f7';
       ctx.fill();
+      ctx.globalAlpha = 1.0;
 
       // Item Badge Circle
       ctx.beginPath();
