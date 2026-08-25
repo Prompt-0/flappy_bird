@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2026-08-25 - Extracted closure out of hot render loop and removed per-frame array allocation
+**Learning:** Re-defining a closure function inside the hot `render()` loop (like `drawPill` inside GameEngine.js) causes significant per-frame memory allocation and garbage collection. Also, using `.filter()` to recycle offscreen elements (like pipes in PipeManager.js) allocates a new array every frame.
+**Action:** Extract nested closures in `render()` into class methods and pass required state variables as arguments. Replace `.filter()` on active entities with an in-place `while` loop and `.shift()` when order guarantees items fall off the leading edge first.
