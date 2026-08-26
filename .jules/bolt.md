@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2025-10-24 - Per-frame GC stutter from array and closure allocations
+**Learning:** Re-assigning arrays (`[]`) and using array iteration methods (`.filter`) inside hot `update()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
+**Action:** Replace arrays of objects generated per-frame with inline mutations using direct variable passing or closures outside loops. Replace `.filter` with traditional `while` loops in hot visual code with `.shift()` to avoid allocating closure contexts 60+ times per second.
