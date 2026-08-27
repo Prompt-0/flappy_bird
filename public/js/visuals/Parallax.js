@@ -51,6 +51,7 @@ export class Parallax {
     this.width = width;
     this.height = height;
     this.playHeight = options.playHeight || 528;
+    this.spriteCache = options.spriteCache || null;
 
     // 5 Parallax layers with speed ratios
     this.layers = [
@@ -388,18 +389,29 @@ export class Parallax {
     const groundY = this.playHeight;
     const groundHeight = this.height - this.playHeight;
 
+    // ⚡ Bolt: Render cached offscreen ground tile to avoid
+    // per-frame multiple fillRect calls and save GC operations
+    if (this.spriteCache) {
+      const sprite = this.spriteCache.getGroundSprite(this.width, groundHeight);
+      if (sprite && !sprite.isMock && ctx.drawImage) {
+        ctx.drawImage(sprite, offsetX, groundY);
+        return;
+      }
+    }
+
+    // Fallback rendering
     ctx.save();
     // Dirt base
-    ctx.fillStyle = '#ded895';
-    ctx.fillRect(offsetX, groundY, this.width, groundHeight);
+    if (ctx.fillStyle !== undefined) ctx.fillStyle = '#ded895';
+    if (ctx.fillRect) ctx.fillRect(offsetX, groundY, this.width, groundHeight);
 
     // Top grass strip
-    ctx.fillStyle = '#73bf2e';
-    ctx.fillRect(offsetX, groundY, this.width, 14);
+    if (ctx.fillStyle !== undefined) ctx.fillStyle = '#73bf2e';
+    if (ctx.fillRect) ctx.fillRect(offsetX, groundY, this.width, 14);
 
     // Dark green edge line
-    ctx.fillStyle = '#558022';
-    ctx.fillRect(offsetX, groundY + 14, this.width, 3);
+    if (ctx.fillStyle !== undefined) ctx.fillStyle = '#558022';
+    if (ctx.fillRect) ctx.fillRect(offsetX, groundY + 14, this.width, 3);
     ctx.restore();
   }
 }
