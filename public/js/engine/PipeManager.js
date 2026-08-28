@@ -101,7 +101,10 @@ export class PipeManager {
     this.checkScoring(birdX);
 
     // 4. Recycle offscreen pipes
-    this.pipes = this.pipes.filter(p => p.x + this.pipeWidth > 0);
+    // ⚡ Bolt: Use .shift() to mutate in-place and avoid per-frame .filter() array allocation
+    while (this.pipes.length > 0 && this.pipes[0].x + this.pipeWidth <= 0) {
+      this.pipes.shift();
+    }
   }
 
   getPipes() {
