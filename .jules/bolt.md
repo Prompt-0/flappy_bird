@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2026-08-29 - Hot Path Array Filtering
+**Learning:** Using `.filter()` to recycle array elements inside a hot loop (like `update()`) allocates a brand new array every frame, creating unnecessary garbage collection pressure and stutter. For sequential element recycling (e.g., removing offscreen pipes), an in-place mutation approach is significantly more efficient.
+**Action:** Instead of assigning `arr = arr.filter(p => p.active)`, use a `while` loop with `arr.shift()` (if elements expire from the start) or an in-place splice/swap strategy in per-frame update methods.
