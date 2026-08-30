@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2026-08-30 - Render Loop Allocations Avoidance
+**Learning:** Per-frame array allocations via `.filter()` and per-frame closure allocations in the render loop cause unnecessary GC churn and potential frame drops. Using `SpriteCache` to replace primitive canvas calls (`fillRect`, `strokeRect`) inside loops also dramatically improves performance for static repeating assets.
+**Action:** When updating or rendering game objects, use in-place `while` or `for` loops with `.shift()` or inline drawing methods. Always pull closures out into class methods, and use offscreen pre-rendered sprites for complex elements.

@@ -228,7 +228,7 @@ export class Parallax {
     return this._cachedCelestial;
   }
 
-  render(ctx) {
+  render(ctx, spriteCache = null) {
     if (!ctx) return;
 
     const skyColors = this.getSkyColors();
@@ -336,8 +336,8 @@ export class Parallax {
 
     // 7. Layer 4: Ground (1.0x)
     const gOffset = this.layers[4].offset;
-    this.renderGround(ctx, -gOffset);
-    this.renderGround(ctx, this.width - gOffset);
+    this.renderGround(ctx, -gOffset, spriteCache);
+    this.renderGround(ctx, this.width - gOffset, spriteCache);
   }
 
   renderMountains(ctx, offsetX) {
@@ -384,22 +384,32 @@ export class Parallax {
     ctx.restore();
   }
 
-  renderGround(ctx, offsetX) {
+  renderGround(ctx, offsetX, spriteCache = null) {
     const groundY = this.playHeight;
     const groundHeight = this.height - this.playHeight;
 
-    ctx.save();
-    // Dirt base
-    ctx.fillStyle = '#ded895';
-    ctx.fillRect(offsetX, groundY, this.width, groundHeight);
+    // ⚡ Bolt: Utilize SpriteCache offscreen pre-rendering if available to bypass expensive primitive drawing
+    let groundSprite = null;
+    if (spriteCache) {
+      groundSprite = spriteCache.getGroundSprite(this.width, groundHeight);
+    }
 
-    // Top grass strip
-    ctx.fillStyle = '#73bf2e';
-    ctx.fillRect(offsetX, groundY, this.width, 14);
+    if (groundSprite && !groundSprite.isMock && ctx.drawImage) {
+      ctx.drawImage(groundSprite, offsetX, groundY);
+    } else {
+      ctx.save();
+      // Dirt base
+      ctx.fillStyle = '#ded895';
+      ctx.fillRect(offsetX, groundY, this.width, groundHeight);
 
-    // Dark green edge line
-    ctx.fillStyle = '#558022';
-    ctx.fillRect(offsetX, groundY + 14, this.width, 3);
-    ctx.restore();
+      // Top grass strip
+      ctx.fillStyle = '#73bf2e';
+      ctx.fillRect(offsetX, groundY, this.width, 14);
+
+      // Dark green edge line
+      ctx.fillStyle = '#558022';
+      ctx.fillRect(offsetX, groundY + 14, this.width, 3);
+      ctx.restore();
+    }
   }
 }

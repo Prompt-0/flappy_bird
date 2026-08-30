@@ -101,27 +101,50 @@ export class PipeManager {
     this.checkScoring(birdX);
 
     // 4. Recycle offscreen pipes
-    this.pipes = this.pipes.filter(p => p.x + this.pipeWidth > 0);
+    // ⚡ Bolt: Avoided per-frame Array .filter() allocation which caused GC stutter
+    while (this.pipes.length > 0 && this.pipes[0].x + this.pipeWidth <= 0) {
+      this.pipes.shift();
+    }
   }
 
   getPipes() {
     return this.pipes;
   }
 
-  render(ctx) {
+  render(ctx, spriteCache = null) {
     if (!ctx) return;
+
+    // ⚡ Bolt: Utilize SpriteCache offscreen pre-rendering if available to bypass expensive primitive drawing
+    let pipeSprite = null;
+    if (spriteCache) {
+      pipeSprite = spriteCache.getPipeSprite(this.pipeWidth, this.playHeight, '#73bf2e');
+    }
+
     ctx.fillStyle = '#73bf2e';
     ctx.strokeStyle = '#558022';
     ctx.lineWidth = 2;
 
     for (const pipe of this.pipes) {
-      // Top Pipe
-      ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
-      ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+      if (pipeSprite && !pipeSprite.isMock && ctx.drawImage) {
+        // Draw top pipe from pre-rendered sprite
+        ctx.save();
+        ctx.translate(pipe.x + this.pipeWidth, pipe.topHeight);
+        ctx.rotate(Math.PI);
+        ctx.drawImage(pipeSprite, 0, 0, this.pipeWidth, pipe.topHeight, 0, 0, this.pipeWidth, pipe.topHeight);
+        ctx.restore();
 
-      // Bottom Pipe
-      ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
-      ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+        // Draw bottom pipe from pre-rendered sprite
+        ctx.drawImage(pipeSprite, 0, 0, this.pipeWidth, pipe.bottomHeight, pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+      } else {
+        // Fallback to primitive rendering
+        // Top Pipe
+        ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+        ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+
+        // Bottom Pipe
+        ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+        ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+      }
     }
   }
 }
