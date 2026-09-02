@@ -388,18 +388,25 @@ export class Parallax {
     const groundY = this.playHeight;
     const groundHeight = this.height - this.playHeight;
 
-    ctx.save();
-    // Dirt base
-    ctx.fillStyle = '#ded895';
-    ctx.fillRect(offsetX, groundY, this.width, groundHeight);
+    // ⚡ Bolt: Optimization - Use pre-rendered offscreen canvas sprites instead of expensive per-frame primitive drawing
+    // Impact: Avoids multiple fillRect calls per frame, reducing main thread rendering time significantly.
+    if (this.spriteCache) {
+      const groundSprite = this.spriteCache.getGroundSprite(this.width, groundHeight);
+      ctx.drawImage(groundSprite, offsetX, groundY);
+    } else {
+      ctx.save();
+      // Dirt base
+      ctx.fillStyle = '#ded895';
+      ctx.fillRect(offsetX, groundY, this.width, groundHeight);
 
-    // Top grass strip
-    ctx.fillStyle = '#73bf2e';
-    ctx.fillRect(offsetX, groundY, this.width, 14);
+      // Top grass strip
+      ctx.fillStyle = '#73bf2e';
+      ctx.fillRect(offsetX, groundY, this.width, 14);
 
-    // Dark green edge line
-    ctx.fillStyle = '#558022';
-    ctx.fillRect(offsetX, groundY + 14, this.width, 3);
-    ctx.restore();
+      // Dark green edge line
+      ctx.fillStyle = '#558022';
+      ctx.fillRect(offsetX, groundY + 14, this.width, 3);
+      ctx.restore();
+    }
   }
 }

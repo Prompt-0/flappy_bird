@@ -17,6 +17,9 @@ export class PipeManager {
     this.margin = config.margin || 45;
     this.spawnInterval = config.spawnInterval || 200; // px interval
 
+    // ⚡ Bolt: Store injected SpriteCache for off-screen rendering optimization
+    this.spriteCache = config.spriteCache || null;
+
     this.reset();
   }
 
@@ -110,18 +113,36 @@ export class PipeManager {
 
   render(ctx) {
     if (!ctx) return;
-    ctx.fillStyle = '#73bf2e';
-    ctx.strokeStyle = '#558022';
-    ctx.lineWidth = 2;
 
-    for (const pipe of this.pipes) {
-      // Top Pipe
-      ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
-      ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+    // ⚡ Bolt: Optimization - Use pre-rendered offscreen canvas sprites instead of expensive per-frame primitive drawing
+    // Impact: Avoids multiple fillRect and strokeRect calls per pipe, reducing main thread rendering time significantly.
+    if (this.spriteCache) {
+      const pipeSprite = this.spriteCache.getPipeSprite(this.pipeWidth, 400); // 400 is max height for cache
+      for (const pipe of this.pipes) {
+        // Top Pipe - Draw upside down using save/restore context transforms
+        ctx.save();
+        ctx.translate(pipe.x, pipe.topHeight);
+        ctx.scale(1, -1);
+        ctx.drawImage(pipeSprite, 0, 0, this.pipeWidth, pipe.topHeight, 0, 0, this.pipeWidth, pipe.topHeight);
+        ctx.restore();
 
-      // Bottom Pipe
-      ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
-      ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+        // Bottom Pipe
+        ctx.drawImage(pipeSprite, 0, 0, this.pipeWidth, pipe.bottomHeight, pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+      }
+    } else {
+      ctx.fillStyle = '#73bf2e';
+      ctx.strokeStyle = '#558022';
+      ctx.lineWidth = 2;
+
+      for (const pipe of this.pipes) {
+        // Top Pipe
+        ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+        ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+
+        // Bottom Pipe
+        ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+        ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
+      }
     }
   }
 }

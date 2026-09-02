@@ -7,3 +7,6 @@
 ## 2024-11-20 - UI Render Loop Array/Closure Allocations
 **Learning:** Initializing array elements (`[]`, `.push({...})`) and using array iteration methods (`.forEach`) inside hot `render()` paths creates per-frame closure and object allocations. This produces continuous garbage collection pressure resulting in noticeable stuttering during rendering, even if drawing operations themselves are fast.
 **Action:** Replace arrays of objects generated per-frame with inline draw instructions using direct variable passing or closures outside loops. Replace `.forEach` with traditional `for` loops in hot visual code to avoid allocating closure contexts 60+ times per second.
+## 2024-09-02 - SpriteCache in Parallax and Pipes
+**Learning:** `SpriteCache` already exists but wasn't being used in `PipeManager` and `Parallax` ground rendering. I can use the cached off-screen canvases in `ctx.drawImage` to avoid expensive per-frame drawing calls to `fillRect`, `strokeRect`, and drawing primitives.
+**Action:** Inject the `SpriteCache` dependency into `PipeManager` and `Parallax` and check for its presence in their `render` methods. If it's available, leverage `getPipeSprite` and `getGroundSprite` and draw them using `ctx.drawImage()`.
