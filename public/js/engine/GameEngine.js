@@ -26,11 +26,11 @@ export class GameEngine {
     this.skinManager = options.skinManager || new SkinManager(this.storageEngine);
     this.audioManager = options.audioManager || new AudioManager({ eventBus: this.eventBus, storageEngine: this.storageEngine });
 
-    this.bird = new Bird(this.eventBus);
-    this.pipeManager = new PipeManager(this.eventBus);
-    this.parallax = new Parallax(360, 640, { playHeight: 528 });
-    this.particleEngine = new ParticleEngine(200);
     this.spriteCache = new SpriteCache();
+    this.bird = new Bird(this.eventBus);
+    this.pipeManager = new PipeManager(this.eventBus, { spriteCache: this.spriteCache });
+    this.parallax = new Parallax(360, 640, { playHeight: 528, spriteCache: this.spriteCache });
+    this.particleEngine = new ParticleEngine(200);
 
     this.powerUpManager = new PowerUpManager(this.eventBus);
     this.gameModeManager = new GameModeManager(this.eventBus);
