@@ -16,6 +16,7 @@ export class PipeManager {
     this.playHeight = config.playHeight || 528;
     this.margin = config.margin || 45;
     this.spawnInterval = config.spawnInterval || 200; // px interval
+    this.spriteCache = config.spriteCache || null;
 
     this.reset();
   }
@@ -100,8 +101,10 @@ export class PipeManager {
     // 3. Score clearance check
     this.checkScoring(birdX);
 
-    // 4. Recycle offscreen pipes
-    this.pipes = this.pipes.filter(p => p.x + this.pipeWidth > 0);
+    // 4. Recycle offscreen pipes (⚡ Bolt: Zero-allocation in-place shift instead of .filter)
+    while (this.pipes.length > 0 && this.pipes[0].x + this.pipeWidth <= 0) {
+      this.pipes.shift();
+    }
   }
 
   getPipes() {
@@ -110,6 +113,7 @@ export class PipeManager {
 
   render(ctx) {
     if (!ctx) return;
+
     ctx.fillStyle = '#73bf2e';
     ctx.strokeStyle = '#558022';
     ctx.lineWidth = 2;

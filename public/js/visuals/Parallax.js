@@ -51,6 +51,7 @@ export class Parallax {
     this.width = width;
     this.height = height;
     this.playHeight = options.playHeight || 528;
+    this.spriteCache = options.spriteCache || null;
 
     // 5 Parallax layers with speed ratios
     this.layers = [
@@ -388,18 +389,30 @@ export class Parallax {
     const groundY = this.playHeight;
     const groundHeight = this.height - this.playHeight;
 
-    ctx.save();
-    // Dirt base
-    ctx.fillStyle = '#ded895';
-    ctx.fillRect(offsetX, groundY, this.width, groundHeight);
+    let useFallback = true;
 
-    // Top grass strip
-    ctx.fillStyle = '#73bf2e';
-    ctx.fillRect(offsetX, groundY, this.width, 14);
+    if (this.spriteCache) {
+      const groundSprite = this.spriteCache.getGroundSprite(this.width, groundHeight);
+      if (groundSprite && !groundSprite.isMock) {
+        ctx.drawImage(groundSprite, offsetX, groundY);
+        useFallback = false;
+      }
+    }
 
-    // Dark green edge line
-    ctx.fillStyle = '#558022';
-    ctx.fillRect(offsetX, groundY + 14, this.width, 3);
-    ctx.restore();
+    if (useFallback) {
+      ctx.save();
+      // Dirt base
+      ctx.fillStyle = '#ded895';
+      ctx.fillRect(offsetX, groundY, this.width, groundHeight);
+
+      // Top grass strip
+      ctx.fillStyle = '#73bf2e';
+      ctx.fillRect(offsetX, groundY, this.width, 14);
+
+      // Dark green edge line
+      ctx.fillStyle = '#558022';
+      ctx.fillRect(offsetX, groundY + 14, this.width, 3);
+      ctx.restore();
+    }
   }
 }
