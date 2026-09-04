@@ -10,3 +10,6 @@
 ## 2026-08-19 - Dynamic Height Sprite Caching Bloat
 **Learning:** Caching objects that have dynamic variable sizes (like pipes with randomly generated heights) using a SpriteCache leads to severe memory bloat and performance degradation, as a new canvas instance is allocated for almost every generated height variant. Furthermore, attempting to optimize this by slicing a single tall cached sprite (using `ctx.drawImage(sprite, sx, sy, sw, sh, dx, dy, dw, dh)`) can introduce visual regressions, such as cutting off stroked borders on the sliced edges (like pipe caps).
 **Action:** Only utilize `SpriteCache` pre-rendering for assets with fixed, predictable dimensions (like ground tiles). For dynamically sized entities, stick to fast primitive canvas drawing (`fillRect`, `strokeRect`) and focus on minimizing state changes.
+## 2026-09-04 - Canvas Rendering Loop State Allocations
+**Learning:** Calling `ctx.save()` and `ctx.restore()` inside a heavy loop (like rendering 200 particles) causes massive stack allocations. Also, recreating closures like `drawPill` inside a frame loop generates GC pressure.
+**Action:** Always hoist `ctx.save()`/`ctx.restore()` out of loops if possible, explicitly reset state like `globalAlpha`, extract render closures to static class methods, and avoid string allocations inside hot render paths.
