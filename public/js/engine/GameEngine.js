@@ -269,10 +269,14 @@ export class GameEngine {
       const shadowWidth = (this.bird.radius * 1.4) * (0.5 + 0.5 * heightRatio);
       const shadowAlpha = 0.25 * heightRatio;
 
-      this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha.toFixed(2)})`;
+      // ⚡ Bolt: Eliminate per-frame string allocation for shadow color
+      this.ctx.globalAlpha = shadowAlpha;
+      this.ctx.fillStyle = '#000000';
       this.ctx.beginPath();
       this.ctx.ellipse(this.bird.x, shadowY, shadowWidth, shadowWidth * 0.35, 0, 0, Math.PI * 2);
       this.ctx.fill();
+
+      this.ctx.globalAlpha = 1.0;
       this.ctx.restore();
     }
 
@@ -304,30 +308,33 @@ export class GameEngine {
         this.ctx.save();
         let currY = 20;
 
-        const drawPill = (text, color) => {
-          this.ctx.fillStyle = color;
-          this.ctx.fillRect(this.width - 98, currY, 88, 20);
-          this.ctx.strokeStyle = '#ffffff';
-          this.ctx.lineWidth = 1.5;
-          this.ctx.strokeRect(this.width - 98, currY, 88, 20);
+        // ⚡ Bolt: Hoist static canvas context assignments out of the draw pill sequence
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.font = 'bold 9px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
 
-          this.ctx.fillStyle = '#ffffff';
-          this.ctx.font = 'bold 9px sans-serif';
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(text, this.width - 54, currY + 10);
-          currY += 24;
-        };
-
-        if (fx.hasShield) drawPill('SHIELD', '#0284c7');
-        if (fx.starTimer > 0) drawPill(`2X (${fx.starTimer.toFixed(1)}s)`, '#d97706');
-        if (fx.slowMoTimer > 0) drawPill(`SLOW (${fx.slowMoTimer.toFixed(1)}s)`, '#7e22ce');
+        if (fx.hasShield) currY = this._drawPill('SHIELD', '#0284c7', currY);
+        if (fx.starTimer > 0) currY = this._drawPill(`2X (${fx.starTimer.toFixed(1)}s)`, '#d97706', currY);
+        if (fx.slowMoTimer > 0) currY = this._drawPill(`SLOW (${fx.slowMoTimer.toFixed(1)}s)`, '#7e22ce', currY);
 
         this.ctx.restore();
       }
     }
 
     this.ctx.restore();
+  }
+
+  _drawPill(text, color, currY) {
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(this.width - 98, currY, 88, 20);
+    this.ctx.strokeRect(this.width - 98, currY, 88, 20);
+
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fillText(text, this.width - 54, currY + 10);
+
+    return currY + 24;
   }
 
   start() {
