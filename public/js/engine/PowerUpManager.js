@@ -144,37 +144,44 @@ export class PowerUpManager {
     if (!ctx) return;
 
     // ⚡ Bolt: Removed per-frame .forEach closure allocation
+    // ⚡ Bolt: Hoisted context styles and state management out of loop to prevent per-frame allocations
+    // Eliminates ~2-5 context property assignments per active power-up per frame
+    ctx.save();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
     for (let i = 0; i < this.activeItems.length; i++) {
       const item = this.activeItems[i];
-      ctx.save();
-      ctx.translate(item.x, item.y);
 
       // Glow backdrop
       ctx.beginPath();
-      ctx.arc(0, 0, this.itemRadius + 4, 0, Math.PI * 2);
-      ctx.fillStyle = item.type === PowerUpType.SHIELD ? 'rgba(56, 189, 248, 0.45)' :
-                      item.type === PowerUpType.STAR ? 'rgba(250, 204, 21, 0.45)' : 'rgba(168, 85, 247, 0.45)';
+      ctx.arc(item.x, item.y, this.itemRadius + 4, 0, Math.PI * 2);
+      // ⚡ Bolt: Eliminated rgba string allocation by using globalAlpha
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = item.type === PowerUpType.SHIELD ? '#38bdf8' :
+                      item.type === PowerUpType.STAR ? '#facc15' : '#a855f7';
       ctx.fill();
 
       // Item Badge Circle
       ctx.beginPath();
-      ctx.arc(0, 0, this.itemRadius, 0, Math.PI * 2);
+      ctx.globalAlpha = 1.0;
+      ctx.arc(item.x, item.y, this.itemRadius, 0, Math.PI * 2);
       ctx.fillStyle = item.type === PowerUpType.SHIELD ? '#0284c7' :
                       item.type === PowerUpType.STAR ? '#d97706' : '#7e22ce';
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2.5;
       ctx.fill();
       ctx.stroke();
 
       // Badge Symbol / Text Label
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
       const label = item.type === PowerUpType.SHIELD ? 'SHD' : item.type === PowerUpType.STAR ? '2X' : 'SLOW';
-      ctx.fillText(label, 0, 1);
-
-      ctx.restore();
+      ctx.fillText(label, item.x, item.y + 1);
     }
+
+    // ⚡ Bolt: Reset explicitly to prevent state bleeding regressions
+    ctx.globalAlpha = 1.0;
+    ctx.restore();
   }
 }
