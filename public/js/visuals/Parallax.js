@@ -90,6 +90,12 @@ export class Parallax {
     this._lastTransitionProgress = -1;
 
     this._cachedCelestial = { x: 0, y: 0, angle: 0, type: '' };
+
+    // ⚡ Bolt: Cache CanvasGradient to prevent per-frame object allocation
+    this._cachedGradient = null;
+    this._lastGradientTop = null;
+    this._lastGradientBottom = null;
+    this._lastGradientHeight = null;
   }
 
   update(dt, scrollSpeed = 160) {
@@ -235,11 +241,19 @@ export class Parallax {
     const skyColors = this.getSkyColors();
 
     // 1. Layer 0: Sky Gradient
-    const skyGradient = ctx.createLinearGradient ? ctx.createLinearGradient(0, 0, 0, this.playHeight) : null;
-    if (skyGradient && skyGradient.addColorStop) {
-      skyGradient.addColorStop(0, skyColors.top);
-      skyGradient.addColorStop(1, skyColors.bottom);
-      ctx.fillStyle = skyGradient;
+    // ⚡ Bolt: Reuse cached CanvasGradient instead of allocating a new object every frame
+    if (ctx.createLinearGradient) {
+      if (!this._cachedGradient || this._lastGradientTop !== skyColors.top || this._lastGradientBottom !== skyColors.bottom || this._lastGradientHeight !== this.playHeight) {
+        this._cachedGradient = ctx.createLinearGradient(0, 0, 0, this.playHeight);
+        if (this._cachedGradient && this._cachedGradient.addColorStop) {
+          this._cachedGradient.addColorStop(0, skyColors.top);
+          this._cachedGradient.addColorStop(1, skyColors.bottom);
+        }
+        this._lastGradientTop = skyColors.top;
+        this._lastGradientBottom = skyColors.bottom;
+        this._lastGradientHeight = this.playHeight;
+      }
+      ctx.fillStyle = this._cachedGradient;
     } else {
       ctx.fillStyle = skyColors.bottom;
     }
