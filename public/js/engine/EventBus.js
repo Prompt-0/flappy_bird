@@ -4,6 +4,8 @@
 export class EventBus {
   constructor() {
     this.listeners = new Map();
+    // ⚡ Bolt: Cache listener arrays to prevent per-frame Array.from allocations
+    this.cachedArrays = new Map();
   }
 
   /**
@@ -18,6 +20,8 @@ export class EventBus {
       this.listeners.set(event, new Set());
     }
     this.listeners.get(event).add(callback);
+    // ⚡ Bolt: Update cached array when listeners change
+    this.cachedArrays.set(event, Array.from(this.listeners.get(event)));
     return () => this.off(event, callback);
   }
 
@@ -32,6 +36,10 @@ export class EventBus {
     set.delete(callback);
     if (set.size === 0) {
       this.listeners.delete(event);
+      this.cachedArrays.delete(event);
+    } else {
+      // ⚡ Bolt: Update cached array when listeners change
+      this.cachedArrays.set(event, Array.from(set));
     }
   }
 
@@ -42,12 +50,13 @@ export class EventBus {
    * @param {*} data - Data payload to pass to subscribers
    */
   emit(event, data) {
-    if (!this.listeners.has(event)) return;
-    // Shallow copy subscriber set to avoid issues if subscribers mutate during emit
-    const callbacks = Array.from(this.listeners.get(event));
-    for (const callback of callbacks) {
+    const callbacks = this.cachedArrays.get(event);
+    if (!callbacks) return;
+
+    // ⚡ Bolt: Iterate over cached array instead of allocating via Array.from on every emit
+    for (let i = 0; i < callbacks.length; i++) {
       try {
-        callback(data);
+        callbacks[i](data);
       } catch (err) {
         console.error(`[EventBus] Error handling event "${event}":`, err);
       }
@@ -59,5 +68,6 @@ export class EventBus {
    */
   clear() {
     this.listeners.clear();
+    this.cachedArrays.clear();
   }
 }
