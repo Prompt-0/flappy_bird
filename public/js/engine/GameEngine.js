@@ -64,6 +64,9 @@ export class GameEngine {
       this.bird.setPalette(activeSkin.palette);
     }
 
+    // ⚡ Bolt: Cache bound loop to prevent per-frame function allocation
+    this._boundLoop = this.loop.bind(this);
+
     if (options.canvas) {
       this.setupCanvas(options.canvas);
     }
@@ -344,7 +347,7 @@ export class GameEngine {
     this.accumulator = 0;
 
     if (typeof requestAnimationFrame !== 'undefined') {
-      this.animationFrameId = requestAnimationFrame(this.loop.bind(this));
+      this.animationFrameId = requestAnimationFrame(this._boundLoop);
     }
   }
 
@@ -377,7 +380,7 @@ export class GameEngine {
     this.render();
 
     if (typeof requestAnimationFrame !== 'undefined') {
-      this.animationFrameId = requestAnimationFrame(this.loop.bind(this));
+      this.animationFrameId = requestAnimationFrame(this._boundLoop);
     }
   }
 

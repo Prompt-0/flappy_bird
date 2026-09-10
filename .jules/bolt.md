@@ -19,3 +19,6 @@
 ## 2026-09-08 - Zero-Allocation Event Bus Iteration
 **Learning:** Iterating over Sets or using `Array.from(Set)` in high-frequency engine loops (like `EventBus.emit()`) causes continuous garbage collection (GC) pressure. However, completely removing the array copy inside `emit()` can introduce bugs if a subscriber removes itself or adds a new listener while the event is being processed.
 **Action:** Shift the array allocation to the mutation phases (`on()` and `off()`). Maintain a cached `Array` representation of the `Set` of listeners, and update this cache only when listeners are added or removed. This ensures `emit()` iterates over a pre-allocated array with a traditional `for` loop, avoiding per-frame allocations while maintaining safe iteration during mutations.
+## 2024-11-20 - requestAnimationFrame Bound Function Allocation
+**Learning:** Using `this.loop.bind(this)` directly inside `requestAnimationFrame()` in a game engine creates a new bound function object every single frame (e.g., 60 times a second), resulting in continuous garbage collection pressure and micro-stutters.
+**Action:** Always pre-bind game loop functions (or any function passed as a callback in a high-frequency loop) in the class constructor (`this._boundLoop = this.loop.bind(this);`) and pass the cached reference to the loop.
