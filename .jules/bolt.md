@@ -22,3 +22,6 @@
 ## 2024-11-20 - requestAnimationFrame Bound Function Allocation
 **Learning:** Using `this.loop.bind(this)` directly inside `requestAnimationFrame()` in a game engine creates a new bound function object every single frame (e.g., 60 times a second), resulting in continuous garbage collection pressure and micro-stutters.
 **Action:** Always pre-bind game loop functions (or any function passed as a callback in a high-frequency loop) in the class constructor (`this._boundLoop = this.loop.bind(this);`) and pass the cached reference to the loop.
+## 2026-09-09 - Redundant Canvas Save/Restore Overhead
+**Learning:** Wrapping simple primitive Canvas draw calls (like `beginPath`, `moveTo`, `arc`, `fill`) that don't modify the transformation matrix or clipping paths with `ctx.save()` and `ctx.restore()` causes unnecessary state stack manipulation overhead, leading to wasted CPU cycles per frame.
+**Action:** Remove `ctx.save()` and `ctx.restore()` when only drawing simple paths and hoist visual configurations like `ctx.fillStyle` to the outermost possible scope instead.
