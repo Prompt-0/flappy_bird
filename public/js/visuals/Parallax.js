@@ -280,30 +280,36 @@ export class Parallax {
       ctx.restore();
 
       // 2. Outer Sun Corona Halo
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.18)';
+      // ⚡ Bolt: Prevent per-frame string allocations by using globalAlpha
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = '#ffea64';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 42, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Middle Glow
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.35)';
+      ctx.globalAlpha = 0.35;
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // 4. Core Sun Disk
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#fff7ed';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 20, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Moon Outer Halo
-      ctx.fillStyle = 'rgba(240, 243, 244, 0.2)';
+      // ⚡ Bolt: Prevent per-frame string allocations by using globalAlpha
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // Moon Body
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 18, 0, Math.PI * 2);
@@ -335,16 +341,20 @@ export class Parallax {
     }
 
     // 4. Layer 1: Mountains (0.15x)
+    // ⚡ Bolt: Hoisted fillStyle configuration out of the loop and removed inner save/restore
+    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#1c2833' : '#4a6572';
     const mOffset = this.layers[1].offset;
     this.renderMountains(ctx, -mOffset);
     this.renderMountains(ctx, this.width - mOffset);
 
     // 5. Layer 2: Hills (0.40x)
+    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#196f3d' : '#27ae60';
     const hOffset = this.layers[2].offset;
     this.renderHills(ctx, -hOffset);
     this.renderHills(ctx, this.width - hOffset);
 
     // 6. Layer 3: Bushes (0.75x)
+    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#145a32' : '#2ecc71';
     const bOffset = this.layers[3].offset;
     this.renderBushes(ctx, -bOffset);
     this.renderBushes(ctx, this.width - bOffset);
@@ -356,8 +366,6 @@ export class Parallax {
   }
 
   renderMountains(ctx, offsetX) {
-    ctx.save();
-    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#1c2833' : '#4a6572';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
     ctx.lineTo(offsetX + 40, this.playHeight - 80);
@@ -368,12 +376,9 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderHills(ctx, offsetX) {
-    ctx.save();
-    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#196f3d' : '#27ae60';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
     ctx.arc(offsetX + 90, this.playHeight, 70, Math.PI, 0);
@@ -381,12 +386,9 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderBushes(ctx, offsetX) {
-    ctx.save();
-    ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#145a32' : '#2ecc71';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
     ctx.arc(offsetX + 40, this.playHeight - 10, 25, Math.PI, 0);
@@ -396,7 +398,6 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderGround(ctx, offsetX) {
