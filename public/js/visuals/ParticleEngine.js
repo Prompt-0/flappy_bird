@@ -177,9 +177,6 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
-    // ⚡ Bolt: Hoisted save/restore out of the rendering loop to prevent up to 200 canvas state allocations per frame
-    ctx.save();
-
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
@@ -194,6 +191,5 @@ export class ParticleEngine {
 
     // ⚡ Bolt: Reset global alpha before restoring to prevent state bleeding regressions
     ctx.globalAlpha = 1.0;
-    ctx.restore();
   }
 }

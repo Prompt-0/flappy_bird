@@ -22,3 +22,6 @@
 ## 2024-11-20 - requestAnimationFrame Bound Function Allocation
 **Learning:** Using `this.loop.bind(this)` directly inside `requestAnimationFrame()` in a game engine creates a new bound function object every single frame (e.g., 60 times a second), resulting in continuous garbage collection pressure and micro-stutters.
 **Action:** Always pre-bind game loop functions (or any function passed as a callback in a high-frequency loop) in the class constructor (`this._boundLoop = this.loop.bind(this);`) and pass the cached reference to the loop.
+## 2024-11-20 - Canvas State Allocations Overuse
+**Learning:** Using `ctx.save()` and `ctx.restore()` strictly modifies properties that change state, without being needed when setting subsequent rendering properties. They cause allocations that build up and GC stutters.
+**Action:** Remove `ctx.save()` and `ctx.restore()` where possible and simply manually reset what changed. Use explicitly bounded primitives and explicit style rendering instead.

@@ -266,7 +266,6 @@ export class GameEngine {
 
     // Render soft ground drop shadow under bird
     if (this.bird.y < this.playHeight - 14) {
-      this.ctx.save();
       const shadowY = this.playHeight - 2;
       const heightRatio = Math.max(0, 1 - (this.playHeight - this.bird.y) / 450);
       const shadowWidth = (this.bird.radius * 1.4) * (0.5 + 0.5 * heightRatio);
@@ -280,7 +279,6 @@ export class GameEngine {
       this.ctx.fill();
 
       this.ctx.globalAlpha = 1.0;
-      this.ctx.restore();
     }
 
     // Render bird (flash during invulnerability)
@@ -292,7 +290,6 @@ export class GameEngine {
 
     // 3. Render Shield Bubble Aura around Bird
     if (this.powerUpManager && this.powerUpManager.activeEffects.hasShield && !this.bird.isDead) {
-      this.ctx.save();
       this.ctx.beginPath();
       this.ctx.arc(this.bird.x, this.bird.y, this.bird.radius + 6, 0, Math.PI * 2);
       this.ctx.strokeStyle = '#38bdf8';
@@ -300,7 +297,10 @@ export class GameEngine {
       this.ctx.shadowColor = '#38bdf8';
       this.ctx.shadowBlur = 12;
       this.ctx.stroke();
-      this.ctx.restore();
+
+      this.ctx.lineWidth = 1;
+      this.ctx.shadowColor = 'transparent';
+      this.ctx.shadowBlur = 0;
     }
 
     // 4. Render Active Power-Up Effects HUD (Top Right)
