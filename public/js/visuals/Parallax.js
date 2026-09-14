@@ -261,10 +261,9 @@ export class Parallax {
 
     // 2. Celestial Body (Sun / Moon) & Volumetric Rays
     const celestial = this.getCelestialPosition();
-    ctx.save();
+
     if (celestial.type === 'sun') {
       // 1. Volumetric God-Rays
-      ctx.save();
       ctx.globalAlpha = 0.12;
       ctx.fillStyle = '#fffbeb';
       const rayCount = 6;
@@ -277,33 +276,39 @@ export class Parallax {
         ctx.closePath();
         ctx.fill();
       }
-      ctx.restore();
 
       // 2. Outer Sun Corona Halo
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.18)';
+      // ⚡ Bolt: Eliminate per-frame string allocation
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = '#ffea64';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 42, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Middle Glow
-      ctx.fillStyle = 'rgba(255, 234, 100, 0.35)';
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = '#ffea64';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // 4. Core Sun Disk
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#fff7ed';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 20, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Moon Outer Halo
-      ctx.fillStyle = 'rgba(240, 243, 244, 0.2)';
+      // ⚡ Bolt: Eliminate per-frame string allocation
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // Moon Body
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#f0f3f4';
       ctx.beginPath();
       ctx.arc(celestial.x, celestial.y, 18, 0, Math.PI * 2);
@@ -316,13 +321,12 @@ export class Parallax {
       ctx.arc(celestial.x + 5, celestial.y + 4, 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.restore();
+    ctx.globalAlpha = 1.0; // Reset alpha to prevent state bleeding
 
     // 3. Starfield Rendering (Night / Twilight)
     const nightFactor = (this.currentPhase === WeatherPhase.NIGHT) ? 1.0 :
                        (this.currentPhase === WeatherPhase.SUNSET || this.currentPhase === WeatherPhase.DAWN) ? 0.4 : 0.0;
     if (nightFactor > 0) {
-      ctx.save();
       ctx.fillStyle = '#ffffff';
       for (let i = 0; i < this.stars.length; i++) {
         const star = this.stars[i];
@@ -331,7 +335,7 @@ export class Parallax {
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.restore();
+      ctx.globalAlpha = 1.0; // Reset alpha to prevent state bleeding
     }
 
     // 4. Layer 1: Mountains (0.15x)
@@ -356,7 +360,6 @@ export class Parallax {
   }
 
   renderMountains(ctx, offsetX) {
-    ctx.save();
     ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#1c2833' : '#4a6572';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
@@ -368,11 +371,9 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderHills(ctx, offsetX) {
-    ctx.save();
     ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#196f3d' : '#27ae60';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
@@ -381,11 +382,9 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderBushes(ctx, offsetX) {
-    ctx.save();
     ctx.fillStyle = (this.currentPhase === WeatherPhase.NIGHT) ? '#145a32' : '#2ecc71';
     ctx.beginPath();
     ctx.moveTo(offsetX, this.playHeight);
@@ -396,7 +395,6 @@ export class Parallax {
     ctx.lineTo(offsetX + 360, this.playHeight);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
   }
 
   renderGround(ctx, offsetX) {
@@ -414,7 +412,6 @@ export class Parallax {
     }
 
     if (useFallback) {
-      ctx.save();
       // Dirt base
       ctx.fillStyle = '#ded895';
       ctx.fillRect(offsetX, groundY, this.width, groundHeight);
@@ -426,7 +423,6 @@ export class Parallax {
       // Dark green edge line
       ctx.fillStyle = '#558022';
       ctx.fillRect(offsetX, groundY + 14, this.width, 3);
-      ctx.restore();
     }
   }
 }
