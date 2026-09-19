@@ -174,11 +174,10 @@ export class Parallax {
   }
 
   getSkyColors() {
-    const phaseStr = `${this.currentPhase}-${this.targetPhase}`;
     const t = (this.currentPhase === this.targetPhase) ? 1.0 : this.phaseTransitionProgress;
 
-    // ⚡ Bolt: Return cached sky colors if phase and transition progress haven't changed
-    if (this._lastPhaseStr === phaseStr && this._lastTransitionProgress === t) {
+    // ⚡ Bolt: Return cached sky colors if phase and transition progress haven't changed (eliminated per-frame string allocation)
+    if (this._lastCurrentPhase === this.currentPhase && this._lastTargetPhase === this.targetPhase && this._lastTransitionProgress === t) {
       return this._cachedSkyColors;
     }
 
@@ -193,7 +192,8 @@ export class Parallax {
     this._cachedSkyColors.top = top;
     this._cachedSkyColors.bottom = bottom;
 
-    this._lastPhaseStr = phaseStr;
+    this._lastCurrentPhase = this.currentPhase;
+    this._lastTargetPhase = this.targetPhase;
     this._lastTransitionProgress = t;
 
     return this._cachedSkyColors;

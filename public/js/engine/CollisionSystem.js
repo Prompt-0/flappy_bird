@@ -8,6 +8,10 @@ export class CollisionSystem {
   // ⚡ Bolt: Cache standard 'no collision' result to prevent per-frame object allocation
   static NO_COLLISION = { collided: false, cause: null };
 
+  // ⚡ Bolt: Cache box objects to avoid per-frame allocations during collision checks
+  static _cachedTopBox = { rx: 0, ry: 0, rw: 0, rh: 0 };
+  static _cachedBottomBox = { rx: 0, ry: 0, rw: 0, rh: 0 };
+
   /**
    * Circle vs Axis-Aligned Bounding Box (AABB) Distance Calculation.
    * Finds nearest point on AABB to circle center and tests distance squared: d² < r²
@@ -92,19 +96,23 @@ export class CollisionSystem {
     const circle = bird.getBoundingCircle ? bird.getBoundingCircle() : bird;
     if (circle.radius === undefined) circle.radius = 13;
 
-    const topBox = pipePair.topPipe || {
-      rx: pipePair.x,
-      ry: 0,
-      rw: pipePair.width || 64,
-      rh: pipePair.topHeight
-    };
+    let topBox = pipePair.topPipe;
+    if (!topBox) {
+      this._cachedTopBox.rx = pipePair.x;
+      this._cachedTopBox.ry = 0;
+      this._cachedTopBox.rw = pipePair.width || 64;
+      this._cachedTopBox.rh = pipePair.topHeight;
+      topBox = this._cachedTopBox;
+    }
 
-    const bottomBox = pipePair.bottomPipe || {
-      rx: pipePair.x,
-      ry: pipePair.bottomY,
-      rw: pipePair.width || 64,
-      rh: pipePair.bottomHeight !== undefined ? pipePair.bottomHeight : (528 - pipePair.bottomY)
-    };
+    let bottomBox = pipePair.bottomPipe;
+    if (!bottomBox) {
+      this._cachedBottomBox.rx = pipePair.x;
+      this._cachedBottomBox.ry = pipePair.bottomY;
+      this._cachedBottomBox.rw = pipePair.width || 64;
+      this._cachedBottomBox.rh = pipePair.bottomHeight !== undefined ? pipePair.bottomHeight : (528 - pipePair.bottomY);
+      bottomBox = this._cachedBottomBox;
+    }
 
     return this.checkCircleAABB(circle, topBox) || this.checkCircleAABB(circle, bottomBox);
   }
