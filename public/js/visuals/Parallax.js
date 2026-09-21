@@ -331,9 +331,8 @@ export class Parallax {
       for (let i = 0; i < this.stars.length; i++) {
         const star = this.stars[i];
         ctx.globalAlpha = star.currentAlpha * nightFactor;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fill();
+        const size = star.radius * 2;
+        ctx.fillRect(star.x - star.radius, star.y - star.radius, size, size);
       }
       ctx.globalAlpha = 1.0; // Reset alpha to prevent state bleeding
     }

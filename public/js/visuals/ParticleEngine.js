@@ -177,16 +177,19 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
+    let lastColor = null;
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
 
       ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
+      if (lastColor !== p.color) {
+        ctx.fillStyle = p.color;
+        lastColor = p.color;
+      }
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      const size = p.size * 2;
+      ctx.fillRect(p.x - p.size, p.y - p.size, size, size);
     }
 
     // ⚡ Bolt: Reset global alpha before restoring to prevent state bleeding regressions

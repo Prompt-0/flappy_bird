@@ -28,3 +28,10 @@
 ## 2026-09-19 - Collision System String/Object Allocation Trap
 **Learning:** In hot loops like `requestAnimationFrame` physics loops and render ticks, creating ad-hoc object literals or using template strings for cache validation keys causes subtle GC spikes.
 **Action:** Replace ad-hoc object allocations with static class-level cached objects (`_cachedTopBox`), and replace string cache keys with simple discrete property equality checks (comparing `_lastPhase` against `currentPhase`).
+## 2024-05-19 - [Canvas Path Rendering Overhead]
+**Learning:** `ctx.arc()` involves significant computational overhead due to path calculations which gets amplified in hot loops like the ParticleEngine. Visually, tiny circles and rectangles look identical.
+**Action:** Replace `ctx.arc()` with `ctx.fillRect()` when rendering small visual effects (like stars or particles) for an easy rendering speedup without loss of visual quality.
+
+## 2024-05-19 - [Redundant Canvas State Updates]
+**Learning:** Setting context styles (like `ctx.fillStyle = color;`) is an expensive operation in HTML5 canvas. Setting the style to the exact same value inside a loop redundantly creates unnecessary work for the browser.
+**Action:** Implement simple caching within drawing loops (e.g., `let lastColor = null; if (lastColor !== color) { ctx.fillStyle = color; lastColor = color; }`) to minimize context state changes.
