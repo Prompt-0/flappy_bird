@@ -184,9 +184,9 @@ export class ParticleEngine {
       ctx.globalAlpha = p.alpha;
       ctx.fillStyle = p.color;
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      // ⚡ Bolt: Replace expensive arc pathing with primitive fillRect for particles
+      const d = p.size * 2;
+      ctx.fillRect(p.x - p.size, p.y - p.size, d, d);
     }
 
     // ⚡ Bolt: Reset global alpha before restoring to prevent state bleeding regressions
