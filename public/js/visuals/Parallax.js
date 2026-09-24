@@ -328,12 +328,19 @@ export class Parallax {
                        (this.currentPhase === WeatherPhase.SUNSET || this.currentPhase === WeatherPhase.DAWN) ? 0.4 : 0.0;
     if (nightFactor > 0) {
       ctx.fillStyle = '#ffffff';
+      // ⚡ Bolt: Batch canvas state assignments to prevent redundant string/property allocations
+      let lastAlpha = -1;
       for (let i = 0; i < this.stars.length; i++) {
         const star = this.stars[i];
-        ctx.globalAlpha = star.currentAlpha * nightFactor;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fill();
+        const alpha = star.currentAlpha * nightFactor;
+
+        if (lastAlpha !== alpha) {
+          ctx.globalAlpha = alpha;
+          lastAlpha = alpha;
+        }
+
+        // ⚡ Bolt: Replace expensive path/arc geometry with lightning-fast fillRect for stars
+        ctx.fillRect(star.x - star.radius, star.y - star.radius, star.radius * 2, star.radius * 2);
       }
       ctx.globalAlpha = 1.0; // Reset alpha to prevent state bleeding
     }
