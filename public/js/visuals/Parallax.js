@@ -328,12 +328,20 @@ export class Parallax {
                        (this.currentPhase === WeatherPhase.SUNSET || this.currentPhase === WeatherPhase.DAWN) ? 0.4 : 0.0;
     if (nightFactor > 0) {
       ctx.fillStyle = '#ffffff';
+      let lastAlpha = null;
       for (let i = 0; i < this.stars.length; i++) {
         const star = this.stars[i];
-        ctx.globalAlpha = star.currentAlpha * nightFactor;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fill();
+        const alpha = star.currentAlpha * nightFactor;
+
+        // ⚡ Bolt: Only apply state changes when they actually differ
+        if (lastAlpha !== alpha) {
+          ctx.globalAlpha = alpha;
+          lastAlpha = alpha;
+        }
+
+        // ⚡ Bolt: Replaced expensive path-based arc/fill with primitive fillRect for small particles
+        const size = star.radius * 2;
+        ctx.fillRect(star.x - star.radius, star.y - star.radius, size, size);
       }
       ctx.globalAlpha = 1.0; // Reset alpha to prevent state bleeding
     }
