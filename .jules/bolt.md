@@ -28,3 +28,6 @@
 ## 2026-09-19 - Collision System String/Object Allocation Trap
 **Learning:** In hot loops like `requestAnimationFrame` physics loops and render ticks, creating ad-hoc object literals or using template strings for cache validation keys causes subtle GC spikes.
 **Action:** Replace ad-hoc object allocations with static class-level cached objects (`_cachedTopBox`), and replace string cache keys with simple discrete property equality checks (comparing `_lastPhase` against `currentPhase`).
+## 2024-11-20 - Batching Canvas State Changes and Optimizing Path Rendering
+**Learning:** Calling path-based canvas drawing operations (`beginPath()`, `arc()`, `fill()`) heavily impacts performance when rendering hundreds of tiny particles. Similarly, assigning properties like `ctx.globalAlpha` and `ctx.fillStyle` every loop iteration incurs expensive context-switching overhead.
+**Action:** When rendering large quantities of small elements, batch context state updates by caching the current values and only assigning them when they change. Replace expensive path-based rendering (`arc()`) with primitive drawing (`fillRect()`) to minimize calculation overhead, as small rectangles are visually indistinguishable from circles.
