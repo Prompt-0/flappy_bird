@@ -177,16 +177,26 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
+    // ⚡ Bolt: Cache state variables to avoid unnecessary context updates
+    let lastColor = null;
+    let lastAlpha = null;
+
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
 
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
+      // ⚡ Bolt: Batch state changes
+      if (lastAlpha !== p.alpha) {
+        ctx.globalAlpha = p.alpha;
+        lastAlpha = p.alpha;
+      }
+      if (lastColor !== p.color) {
+        ctx.fillStyle = p.color;
+        lastColor = p.color;
+      }
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      // ⚡ Bolt: Use fast primitives instead of pathing
+      ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
     }
 
     // ⚡ Bolt: Reset global alpha before restoring to prevent state bleeding regressions
