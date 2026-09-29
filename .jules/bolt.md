@@ -28,3 +28,10 @@
 ## 2026-09-19 - Collision System String/Object Allocation Trap
 **Learning:** In hot loops like `requestAnimationFrame` physics loops and render ticks, creating ad-hoc object literals or using template strings for cache validation keys causes subtle GC spikes.
 **Action:** Replace ad-hoc object allocations with static class-level cached objects (`_cachedTopBox`), and replace string cache keys with simple discrete property equality checks (comparing `_lastPhase` against `currentPhase`).
+## 2024-12-07 - Canvas FillRect Primitive Over Arc Pathing
+**Learning:** Rendering many small circular entities (like particles or stars) using `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` introduces significant calculation and pathing overhead in the hot render loop. Because these entities are so small and fast-moving, rendering them as small squares using `ctx.fillRect()` yields visually indistinguishable results while drastically reducing CPU load.
+**Action:** Always replace `ctx.arc()` path sequences with `ctx.fillRect()` when drawing numerous tiny particles or distant stars.
+
+## 2024-12-07 - Batching Context State Assignments
+**Learning:** Blindly setting `ctx.fillStyle` or `ctx.globalAlpha` inside a `for` loop for every entity, even when the value hasn't changed from the previous iteration, causes unnecessary overhead. Modifying Canvas 2D context properties requires crossing the JS-to-C++ boundary, which is computationally expensive.
+**Action:** Introduce a local tracker variable (e.g., `lastColor` or `lastAlpha`) right before the loop, and wrap context property assignments in an `if` check to ensure the state is only updated when the incoming value differs from the active state.

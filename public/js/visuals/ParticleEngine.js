@@ -177,16 +177,22 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
+    // ⚡ Bolt: Track last color to prevent redundant context state assignments
+    let lastColor = null;
+
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
 
       ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      if (lastColor !== p.color) {
+        ctx.fillStyle = p.color;
+        lastColor = p.color;
+      }
+
+      // ⚡ Bolt: Replace expensive path tracing (arc) with primitive fillRect
+      ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
     }
 
     // ⚡ Bolt: Reset global alpha before restoring to prevent state bleeding regressions
