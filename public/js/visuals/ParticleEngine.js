@@ -177,12 +177,22 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
+    let lastAlpha = null;
+    let lastColor = null;
+
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
 
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
+      if (lastAlpha !== p.alpha) {
+        ctx.globalAlpha = p.alpha;
+        lastAlpha = p.alpha;
+      }
+
+      if (lastColor !== p.color) {
+        ctx.fillStyle = p.color;
+        lastColor = p.color;
+      }
 
       // ⚡ Bolt: Use fast fillRect instead of expensive pathing arcs for tiny particles
       ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
