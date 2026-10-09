@@ -31,3 +31,6 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+## 2026-10-09 - Canvas Context Caching with Entity Ordering
+**Learning:** Grouping entities by color sequentially during emission vastly improves the cache hit rate for state-batching rendering loops. Setting canvas context values (e.g. `ctx.fillStyle`) has measurable bridge overhead, and caching the `lastColor` only works well if the drawn entities don't alternate colors every frame.
+**Action:** When creating grouped particles/entities, initialize them in color chunks instead of random/modulo alternation to optimize for rendering cache locality.
