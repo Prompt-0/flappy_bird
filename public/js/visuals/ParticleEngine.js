@@ -126,7 +126,8 @@ export class ParticleEngine {
       const vy = Math.sin(angle) * speed;
       const life = 0.5 + Math.random() * 0.4;
       const size = 3 + Math.random() * 3;
-      const color = (i % 3 === 0) ? '#f39c12' : ((i % 3 === 1) ? '#e74c3c' : '#ffffff');
+      // ⚡ Bolt: Group identically colored particles to maximize canvas fillStyle cache hits
+      const color = (i < 9) ? '#f39c12' : ((i < 17) ? '#e74c3c' : '#ffffff');
       const gravity = 350;
 
       this._activateParticle(p, x, y, vx, vy, life, color, size, gravity, 'collision');
@@ -147,7 +148,8 @@ export class ParticleEngine {
       const vy = Math.sin(angle) * speed;
       const life = 0.6 + Math.random() * 0.4;
       const size = 2.5 + Math.random() * 2.5;
-      const color = (i % 2 === 0) ? '#ffd700' : '#ffffff';
+      // ⚡ Bolt: Group identically colored particles to maximize canvas fillStyle cache hits
+      const color = (i < 8) ? '#ffd700' : '#ffffff';
       const gravity = 120;
 
       this._activateParticle(p, x, y, vx, vy, life, color, size, gravity, 'score');
@@ -177,12 +179,23 @@ export class ParticleEngine {
   render(ctx) {
     if (!ctx) return;
 
+    // ⚡ Bolt: Cache canvas state to prevent expensive bridge calls when values haven't changed
+    let lastAlpha = -1;
+    let lastColor = null;
+
     for (let i = 0; i < this.capacity; i++) {
       const p = this.pool[i];
       if (!p.active) continue;
 
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
+      if (lastAlpha !== p.alpha) {
+        ctx.globalAlpha = p.alpha;
+        lastAlpha = p.alpha;
+      }
+
+      if (lastColor !== p.color) {
+        ctx.fillStyle = p.color;
+        lastColor = p.color;
+      }
 
       // ⚡ Bolt: Use fast fillRect instead of expensive pathing arcs for tiny particles
       ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
