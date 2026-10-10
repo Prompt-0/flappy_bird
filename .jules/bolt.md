@@ -31,3 +31,6 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+## 2024-11-20 - Canvas fillStyle Cache Optimization in Object Pools
+**Learning:** When using a zero-allocation object pool, attempting to group particle colors sequentially during emission (e.g., `i < 9 ? colorA : colorB`) to maximize `fillStyle` cache hits during rendering is ineffective and causes visual regressions (distinct wedges of color). Because particles are recycled randomly, they are rendered in non-sequential memory order. However, implementing a `lastColor` tracker in the render loop itself remains a valid optimization, as it still skips redundant canvas API assignments when adjacent recycled particles happen to share a color.
+**Action:** Do not try to sequentially sort or assign colors in emitters when using an object pool. Stick to implementing the state cache (e.g., `lastColor`) in the render loop to capture whatever organic cache hits occur.
