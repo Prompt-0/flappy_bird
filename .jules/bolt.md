@@ -31,3 +31,6 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+## 2026-10-06 - Canvas Optimization Pattern: Path Batching
+**Learning:** Drawing multiple identical shapes using a loop that calls `beginPath()`, `moveTo()`, `lineTo()`, `closePath()`, and `fill()` inside each iteration wastes frame budget due to redundant Canvas 2D API interaction overhead.
+**Action:** Always batch these path operations by hoisting `ctx.beginPath()` outside the loop and replacing multiple single shape fills with one batched `ctx.fill()` call.
