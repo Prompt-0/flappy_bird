@@ -31,3 +31,6 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+## 2024-11-20 - Canvas Path Batching and State Tracking
+**Learning:** Moving path instructions (`ctx.beginPath()`, `ctx.fill()`) outside of loops to construct a single continuous path significantly reduces overhead. Similarly, wrapping state assignments (`ctx.fillStyle`, `ctx.globalAlpha`) in caching checks (`lastColor !== newColor`) reduces the JS-to-C++ bridge cost of canvas state updates.
+**Action:** Use these techniques whenever rendering dense geometry or large numbers of items to the canvas.
