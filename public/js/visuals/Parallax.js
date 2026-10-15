@@ -264,18 +264,18 @@ export class Parallax {
 
     if (celestial.type === 'sun') {
       // 1. Volumetric God-Rays
+      // ⚡ Bolt: Batched path operations by hoisting beginPath and fill outside the loop
       ctx.globalAlpha = 0.12;
       ctx.fillStyle = '#fffbeb';
       const rayCount = 6;
+      ctx.beginPath();
       for (let i = 0; i < rayCount; i++) {
         const rayAngle = (i * Math.PI / 3) + (this.phaseTimer * 0.05);
-        ctx.beginPath();
         ctx.moveTo(celestial.x, celestial.y);
         ctx.lineTo(celestial.x + Math.cos(rayAngle - 0.15) * 350, celestial.y + Math.sin(rayAngle - 0.15) * 350);
         ctx.lineTo(celestial.x + Math.cos(rayAngle + 0.15) * 350, celestial.y + Math.sin(rayAngle + 0.15) * 350);
-        ctx.closePath();
-        ctx.fill();
       }
+      ctx.fill();
 
       // 2. Outer Sun Corona Halo
       // ⚡ Bolt: Eliminate per-frame string allocation
@@ -328,9 +328,14 @@ export class Parallax {
                        (this.currentPhase === WeatherPhase.SUNSET || this.currentPhase === WeatherPhase.DAWN) ? 0.4 : 0.0;
     if (nightFactor > 0) {
       ctx.fillStyle = '#ffffff';
+      let lastAlpha = -1;
       for (let i = 0; i < this.stars.length; i++) {
         const star = this.stars[i];
-        ctx.globalAlpha = star.currentAlpha * nightFactor;
+        const newAlpha = star.currentAlpha * nightFactor;
+        if (lastAlpha !== newAlpha) {
+          ctx.globalAlpha = newAlpha;
+          lastAlpha = newAlpha;
+        }
         // ⚡ Bolt: Use fast fillRect instead of expensive pathing arcs for tiny stars
         ctx.fillRect(star.x - star.radius, star.y - star.radius, star.radius * 2, star.radius * 2);
       }
