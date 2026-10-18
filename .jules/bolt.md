@@ -31,3 +31,10 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+## 2026-10-04 - Canvas State Loop Caching Pattern
+**Learning:** Setting canvas context state properties like `ctx.globalAlpha` and `ctx.fillStyle` inside a high-frequency loop (like rendering 200 particles) incurs measurable overhead due to the browser's internal canvas state tracking.
+**Action:** Always employ local cache variables (e.g., `lastAlpha`, `lastColor`) initialized with sentinel values (e.g., `-1`, `''`) before iterative render loops to track the currently applied state, and only reassign the property when the value changes.
+
+## 2026-10-04 - Canvas Loop Path Batching Pattern
+**Learning:** Calling `ctx.beginPath()` and `ctx.fill()` or `ctx.stroke()` for every item in an iterative loop when drawing identically styled shapes (like hatch lines or rays) multiplies canvas pathing overhead.
+**Action:** When iterating to draw multiple identical paths, hoist `ctx.beginPath()` immediately before the loop and the drawing command (`ctx.stroke()` or `ctx.fill()`) immediately after the loop, restricting the loop body strictly to geometry modifications (`moveTo`, `lineTo`, etc.).
