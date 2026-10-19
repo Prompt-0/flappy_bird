@@ -165,12 +165,14 @@ export class SpriteCache {
       if (ctx.beginPath && ctx.stroke) {
         ctx.strokeStyle = '#cbb86b';
         ctx.lineWidth = 2;
+
+        // ⚡ Bolt: Batch hatch line path operations to minimize Canvas API overhead
+        ctx.beginPath();
         for (let x = -height; x < width + height; x += 16) {
-          ctx.beginPath();
           ctx.moveTo(x, 17);
           ctx.lineTo(x + height, height);
-          ctx.stroke();
         }
+        ctx.stroke();
       }
     }
 
