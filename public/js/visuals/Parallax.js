@@ -267,15 +267,17 @@ export class Parallax {
       ctx.globalAlpha = 0.12;
       ctx.fillStyle = '#fffbeb';
       const rayCount = 6;
+
+      // ⚡ Bolt: Batch path operations by hoisting beginPath and fill outside the loop
+      ctx.beginPath();
       for (let i = 0; i < rayCount; i++) {
         const rayAngle = (i * Math.PI / 3) + (this.phaseTimer * 0.05);
-        ctx.beginPath();
         ctx.moveTo(celestial.x, celestial.y);
         ctx.lineTo(celestial.x + Math.cos(rayAngle - 0.15) * 350, celestial.y + Math.sin(rayAngle - 0.15) * 350);
         ctx.lineTo(celestial.x + Math.cos(rayAngle + 0.15) * 350, celestial.y + Math.sin(rayAngle + 0.15) * 350);
         ctx.closePath();
-        ctx.fill();
       }
+      ctx.fill();
 
       // 2. Outer Sun Corona Halo
       // ⚡ Bolt: Eliminate per-frame string allocation
