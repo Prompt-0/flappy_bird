@@ -31,3 +31,7 @@
 ## 2026-10-03 - Canvas Optimization Pattern: Rendering small entities
 **Learning:** For rendering many small entities (like particles or stars), using `ctx.fillRect()` instead of `ctx.beginPath()`, `ctx.arc()`, and `ctx.fill()` avoids significant pathing and calculation overhead without a noticeable reduction in visual quality.
 **Action:** Replace expensive circular path drawing with fast square fills for objects with very small radii to improve rendering performance in hot loops.
+
+## 2024-05-24 - [Canvas Context Caching & Path Batching]
+**Learning:** Hot render loops can suffer from redundant C++ binding API calls to the Canvas API (like `ctx.globalAlpha` or `ctx.fillStyle`), and iterating identical volumetric path shapes triggers redundant native path computation.
+**Action:** Always cache canvas context state (`lastAlpha`, `lastColor`) in hot loops to eliminate redundant state assignment calls. Additionally, for identical volumetric rays or starbursts, hoist `ctx.beginPath()` and `ctx.fill()` completely outside the iterative rendering loop.
